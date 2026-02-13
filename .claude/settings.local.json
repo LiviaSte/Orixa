@@ -10,7 +10,10 @@
       "Bash(curl:*)",
       "Bash(npm run dev:*)",
       "mcp__figma__whoami",
-      "Bash(lsof:*)"
+      "Bash(lsof:*)",
+      "Bash(git rm:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
