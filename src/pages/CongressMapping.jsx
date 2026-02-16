@@ -422,7 +422,7 @@ export default function CongressMapping() {
         <div className="flex flex-col gap-6">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-sm">
-            <Link to="/" className="text-[#6a7282] transition-colors hover:text-[#155dfc]">
+            <Link to="/?tab=databases" className="text-[#6a7282] transition-colors hover:text-[#155dfc]">
               Data sources
             </Link>
             <span className="text-[#6a7282]">/</span>

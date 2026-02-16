@@ -1,5 +1,32 @@
 // ── Sidebar nav icons ────────────────────────────────────────────
 
+export function GoalTrackingIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M8 12.5L10.5 15L16 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function TrendUpIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 16L8.5 11.5L12.5 15.5L20 8" stroke="#4a5565" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M15 8H20V13" stroke="#4a5565" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function CheckCircleOutlineIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="9" stroke="#4a5565" strokeWidth="1.75"/>
+      <path d="M8.5 12.5L10.5 14.5L15.5 9.5" stroke="#4a5565" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
 export function DataSourcesIcon() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -350,6 +377,378 @@ export function SearchIcon20() {
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="9" cy="9" r="5.5" stroke="currentColor" strokeWidth="1.5"/>
       <path d="M13 13L17 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+// ── Conflict Resolution page icons ────────────────────────────────
+
+export function InfoCircleIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="9" stroke="#155dfc" strokeWidth="1.5"/>
+      <path d="M12 11V16" stroke="#155dfc" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="12" cy="8" r="0.75" fill="#155dfc"/>
+    </svg>
+  );
+}
+
+export function GreenCheckIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="8" cy="8" r="6" fill="#00C950"/>
+      <path d="M5.5 8L7.2 9.7L10.5 6.3" stroke="white" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function ConflictTriangleIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M7.13 2.57L1.21 12C1.09 12.2 1.03 12.43 1.03 12.66C1.03 12.9 1.09 13.13 1.21 13.33C1.33 13.53 1.49 13.7 1.69 13.82C1.89 13.94 2.12 14 2.36 14H14.16C14.4 14 14.63 13.94 14.83 13.82C15.03 13.7 15.19 13.53 15.31 13.33C15.43 13.13 15.49 12.9 15.49 12.66C15.49 12.43 15.43 12.2 15.31 12L9.39 2.57C9.27 2.38 9.11 2.22 8.91 2.1C8.71 1.99 8.49 1.93 8.26 1.93C8.03 1.93 7.81 1.99 7.61 2.1C7.41 2.22 7.25 2.38 7.13 2.57Z" fill="#FF9500"/>
+      <path d="M8.26 6V8.67" stroke="white" strokeWidth="1.25" strokeLinecap="round"/>
+      <circle cx="8.26" cy="11" r="0.6" fill="white"/>
+    </svg>
+  );
+}
+
+export function TransferIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="24" height="24" rx="6" fill="#F3F4F6"/>
+      <path d="M8 10H16M16 10L13.5 7.5M16 10L13.5 12.5" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M16 14H8M8 14L10.5 11.5M8 14L10.5 16.5" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function ExternalLinkIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 8.67V12.67C12 13.02 11.86 13.36 11.61 13.61C11.36 13.86 11.02 14 10.67 14H3.33C2.98 14 2.64 13.86 2.39 13.61C2.14 13.36 2 13.02 2 12.67V5.33C2 4.98 2.14 4.64 2.39 4.39C2.64 4.14 2.98 4 3.33 4H7.33" stroke="#155dfc" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M10 2H14V6" stroke="#155dfc" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M6.67 9.33L14 2" stroke="#155dfc" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function CloseIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 4L4 12" stroke="#6a7282" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M4 4L12 12" stroke="#6a7282" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+// ── HCP Detail page icons ──────────────────────────────────────────
+
+export function HospitalBuildingIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2 14V5.5L8 2L14 5.5V14" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M6 14V10H10V14" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M8 5.5V8" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round"/>
+      <path d="M6.5 6.75H9.5" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+export function CalendarEventIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="3" width="12" height="11" rx="2" stroke="#6A7282" strokeWidth="1.25"/>
+      <path d="M2 7H14" stroke="#6A7282" strokeWidth="1.25"/>
+      <path d="M5 1.5V3.5" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round"/>
+      <path d="M11 1.5V3.5" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round"/>
+      <circle cx="8" cy="10.5" r="1" fill="#6A7282"/>
+    </svg>
+  );
+}
+
+export function PublicationIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 2.5C3 2.22386 3.22386 2 3.5 2H12.5C12.7761 2 13 2.22386 13 2.5V13.5C13 13.7761 12.7761 14 12.5 14H3.5C3.22386 14 3 13.7761 3 13.5V2.5Z" stroke="#6A7282" strokeWidth="1.25"/>
+      <path d="M5.5 5H10.5" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round"/>
+      <path d="M5.5 7.5H10.5" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round"/>
+      <path d="M5.5 10H8" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+export function LightningIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8.5 1.5L3 9H8L7.5 14.5L13 7H8L8.5 1.5Z" stroke="#F59E0B" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" fill="#FEF3C7"/>
+    </svg>
+  );
+}
+
+export function EmailEnvelopeIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="3.5" width="12" height="9" rx="1.5" stroke="#155dfc" strokeWidth="1.25"/>
+      <path d="M2 5L8 9L14 5" stroke="#155dfc" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function GreenCheckCircleIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="8" cy="8" r="6.5" stroke="#15803d" strokeWidth="1.25"/>
+      <path d="M5.5 8L7.2 9.7L10.5 6.3" stroke="#15803d" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function RefreshSyncIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M13.5 6.5C12.9 4.2 10.7 2.5 8 2.5C5.5 2.5 3.4 4 2.6 6" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round"/>
+      <path d="M2.5 9.5C3.1 11.8 5.3 13.5 8 13.5C10.5 13.5 12.6 12 13.4 10" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round"/>
+      <path d="M11 6.5H13.5V4" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M5 9.5H2.5V12" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function DocumentFileIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 1.5C3 1.22386 3.22386 1 3.5 1H7.5L9.5 3V10.5C9.5 10.7761 9.27614 11 9 11H3.5C3.22386 11 3 10.7761 3 10.5V1.5Z" stroke="#155dfc" strokeWidth="1" strokeLinejoin="round"/>
+      <path d="M7.5 1V3H9.5" stroke="#155dfc" strokeWidth="1" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function LogInteractionIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M13.5 8C13.5 11 11 13.5 8 13.5C6.5 13.5 4.5 13 3.5 11.5L2.5 13" stroke="#0a0a0a" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M2.5 8C2.5 5 5 2.5 8 2.5C9.5 2.5 11.5 3 12.5 4.5L13.5 3" stroke="#0a0a0a" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M8 5V8L10 9.5" stroke="#0a0a0a" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function ShareIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 10C5.10457 10 6 9.10457 6 8C6 6.89543 5.10457 6 4 6C2.89543 6 2 6.89543 2 8C2 9.10457 2.89543 10 4 10Z" stroke="white" strokeWidth="1.25"/>
+      <path d="M12 6C13.1046 6 14 5.10457 14 4C14 2.89543 13.1046 2 12 2C10.8954 2 10 2.89543 10 4C10 5.10457 10.8954 6 12 6Z" stroke="white" strokeWidth="1.25"/>
+      <path d="M12 14C13.1046 14 14 13.1046 14 12C14 10.8954 13.1046 10 12 10C10.8954 10 10 10.8954 10 12C10 13.1046 10.8954 14 12 14Z" stroke="white" strokeWidth="1.25"/>
+      <path d="M5.8 9.1L10.2 11.4" stroke="white" strokeWidth="1.25" strokeLinecap="round"/>
+      <path d="M10.2 4.6L5.8 6.9" stroke="white" strokeWidth="1.25" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+export function EditPencilIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M11.5 2.5L13.5 4.5L5 13H3V11L11.5 2.5Z" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M9.5 4.5L11.5 6.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function MoreDotsIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="8" cy="3.5" r="1" fill="#6A7282"/>
+      <circle cx="8" cy="8" r="1" fill="#6A7282"/>
+      <circle cx="8" cy="12.5" r="1" fill="#6A7282"/>
+    </svg>
+  );
+}
+
+export function WebVisitIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="7" cy="7" r="5.5" stroke="#6A7282" strokeWidth="1.25"/>
+      <path d="M2 7H12" stroke="#6A7282" strokeWidth="1.25"/>
+      <path d="M7 1.5C8.5 3 9.2 5 9.2 7C9.2 9 8.5 11 7 12.5" stroke="#6A7282" strokeWidth="1.25"/>
+      <path d="M7 1.5C5.5 3 4.8 5 4.8 7C4.8 9 5.5 11 7 12.5" stroke="#6A7282" strokeWidth="1.25"/>
+    </svg>
+  );
+}
+
+export function ClickIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5.5 1.5V3" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round"/>
+      <path d="M2 5H3.5" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round"/>
+      <path d="M3 3L4 4" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round"/>
+      <path d="M5.5 5.5L5.5 9.5L7 8.5L8 11.5L9.5 11L8.5 8L10.5 7.5L5.5 5.5Z" stroke="#6A7282" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function DownloadBrochureIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M7 2V9" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round"/>
+      <path d="M4.5 7L7 9.5L9.5 7" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M3 11.5H11" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+export function OpenedEmailIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2 5.5V11.5C2 12.0523 2.44772 12.5 3 12.5H11C11.5523 12.5 12 12.0523 12 11.5V5.5" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round"/>
+      <path d="M2 5.5L7 2L12 5.5" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M2 5.5L7 8.5L12 5.5" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function CrmIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="8" cy="6" r="3" stroke="#3b82f6" strokeWidth="1.25"/>
+      <path d="M3 13C3 10.7909 5.23858 9 8 9C10.7614 9 13 10.7909 13 13" stroke="#3b82f6" strokeWidth="1.25" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+export function MarketingCloudIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4.5 13C2.84315 13 1.5 11.6569 1.5 10C1.5 8.60929 2.45687 7.43409 3.75 7.1C3.75 7.067 3.75 7.033 3.75 7C3.75 4.51472 5.76472 2.5 8.25 2.5C10.3 2.5 12 3.85 12.5 5.7C12.6 5.69 12.7 5.685 12.8 5.685C14.2 5.685 15.3 6.835 15.3 8.185C15.3 9.535 14.2 10.685 12.8 10.685" stroke="#f97316" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M8 8V13" stroke="#f97316" strokeWidth="1.25" strokeLinecap="round"/>
+      <path d="M6 10L8 8L10 10" stroke="#f97316" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function ErpIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="8" width="3.5" height="5" rx="0.5" stroke="#22c55e" strokeWidth="1.25"/>
+      <rect x="6.25" y="5" width="3.5" height="8" rx="0.5" stroke="#22c55e" strokeWidth="1.25"/>
+      <rect x="10.5" y="2.5" width="3.5" height="10.5" rx="0.5" stroke="#22c55e" strokeWidth="1.25"/>
+    </svg>
+  );
+}
+
+// ── Hospital Detail page icons ─────────────────────────────────────
+
+export function HospitalAvatarIcon() {
+  return (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 28V11L16 4L28 11V28" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M12 28V20H20V28" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M16 10V16" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M13 13H19" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+export function PhoneIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6.5 3.5L5 2H2.5C2.22386 2 2 2.22386 2 2.5C2 9.12742 7.37258 14.5 14 14.5C14.2761 14.5 14.5 14.2761 14.5 14V11.5L13 10L10.5 11.5C9.5 11 7 9.5 5 7L6.5 4.5V3.5Z" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function EmailSmallIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="3.5" width="12" height="9" rx="1.5" stroke="#6A7282" strokeWidth="1.25"/>
+      <path d="M2 5L8 9L14 5" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+// ── Opportunity Creation page icons ─────────────────────────────────
+
+export function StagesIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="1" y="3" width="6" height="5" rx="1" stroke="#111318" strokeWidth="1.5"/>
+      <rect x="11" y="3" width="6" height="5" rx="1" stroke="#111318" strokeWidth="1.5"/>
+      <rect x="1" y="10" width="6" height="5" rx="1" stroke="#111318" strokeWidth="1.5"/>
+      <rect x="11" y="10" width="6" height="5" rx="1" stroke="#111318" strokeWidth="1.5"/>
+      <path d="M7 5.5H11" stroke="#111318" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M7 12.5H11" stroke="#111318" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+export function ConversionTriggersIcon() {
+  return (
+    <svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9 1L2 11H8L7 19L14 9H8L9 1Z" stroke="#111318" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function ArrowRightLongIcon() {
+  return (
+    <svg width="24" height="12" viewBox="0 0 24 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M1 6H23" stroke="#6a7282" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M18 1L23 6L18 11" stroke="#6a7282" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function TrashIcon() {
+  return (
+    <svg width="16" height="18" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M1 4H15" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round"/>
+      <path d="M3 4V15C3 15.5523 3.44772 16 4 16H12C12.5523 16 13 15.5523 13 15V4" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M5.5 1.5H10.5" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round"/>
+      <path d="M6.5 7.5V12.5" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round"/>
+      <path d="M9.5 7.5V12.5" stroke="#6A7282" strokeWidth="1.25" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+export function PlusSmallIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 1V11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M1 6H11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+export function NotConfiguredIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="8" cy="8" r="6" fill="#EF4444"/>
+      <path d="M6 6L10 10" stroke="white" strokeWidth="1.25" strokeLinecap="round"/>
+      <path d="M10 6L6 10" stroke="white" strokeWidth="1.25" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+export function DragHandleIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="6" cy="4" r="1.25" fill="currentColor"/>
+      <circle cx="10" cy="4" r="1.25" fill="currentColor"/>
+      <circle cx="6" cy="8" r="1.25" fill="currentColor"/>
+      <circle cx="10" cy="8" r="1.25" fill="currentColor"/>
+      <circle cx="6" cy="12" r="1.25" fill="currentColor"/>
+      <circle cx="10" cy="12" r="1.25" fill="currentColor"/>
+    </svg>
+  );
+}
+
+export function LadderIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 3V17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M14 3V17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M6 6H14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M6 10H14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M6 14H14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
   );
 }

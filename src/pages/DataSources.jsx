@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { useMappingContext } from "../MappingContext";
 import {
@@ -88,13 +88,6 @@ const connectors = [
 
 const projectRows = [
   {
-    fileName: "Congress_data_v2",
-    format: "XLSX",
-    project: "Global operations",
-    uploadDate: "24/01/2026",
-    status: "MAPPED",
-  },
-  {
     fileName: "Webinar_Records_A1",
     format: "XLSX",
     project: "Aliax awareness",
@@ -112,8 +105,10 @@ const projectRows = [
 
 export default function DataSources() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { getMapping } = useMappingContext();
-  const [activeTab, setActiveTab] = useState("connectors");
+  const initialTab = searchParams.get("tab") || "connectors";
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [searchQuery, setSearchQuery] = useState("");
   const [connectorSearch, setConnectorSearch] = useState("");
 
