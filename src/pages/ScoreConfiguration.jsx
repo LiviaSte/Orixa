@@ -695,9 +695,6 @@ function EngagementScoreTab() {
                   </svg>
                   Add KPI
                 </button>
-                <span className={`text-xs font-semibold ${total === 100 ? "text-[#16a34a]" : "text-[#f59e0b]"}`}>
-                  Total: {total}%
-                </span>
               </div>
             </div>
           );
