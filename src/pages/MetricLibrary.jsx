@@ -167,17 +167,24 @@ export default function MetricLibrary() {
             </div>
 
             {/* Type filter */}
-            <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className={SELECT_CLS}
-            >
-              {availableTypes.map((t) => (
-                <option key={t} value={t}>
-                  {t === "All" ? "All types" : t.charAt(0).toUpperCase() + t.slice(1)}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                className={SELECT_CLS}
+              >
+                {availableTypes.map((t) => (
+                  <option key={t} value={t}>
+                    {t === "All" ? "All types" : t.charAt(0).toUpperCase() + t.slice(1)}
+                  </option>
+                ))}
+              </select>
+              <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9ca3af]">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
+            </div>
 
             {/* Count */}
             <span className="ml-auto text-xs text-[#9ca3af]">

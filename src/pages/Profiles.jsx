@@ -332,24 +332,13 @@ export default function Profiles() {
                             setPriorityDropdownOpen(false);
                             setCurrentPage(1);
                           }}
-                          className={`flex w-full items-center gap-2 px-[13px] py-[10px] text-left text-sm transition-colors hover:bg-[#f9fafb] ${
+                          className={`flex w-full items-center px-[13px] py-[10px] text-left text-sm transition-colors hover:bg-[#f9fafb] ${
                             priorityFilter === option
                               ? "bg-[#f9fafb] font-medium text-[#155dfc]"
                               : "text-[#4a5565]"
                           }`}
                         >
-                          {option === "All" ? (
-                            "All priorities"
-                          ) : (
-                            <>
-                              <span
-                                className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-medium ${priorityStyles[option]}`}
-                              >
-                                {option}
-                              </span>
-                              {option}
-                            </>
-                          )}
+                          {option === "All" ? "All priorities" : option}
                         </button>
                       ))}
                     </div>

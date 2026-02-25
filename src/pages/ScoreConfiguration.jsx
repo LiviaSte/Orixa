@@ -22,7 +22,7 @@ const DEFAULT_ICP_COMPONENTS = [
   {
     id: "firmographic",
     component: "Firmographic Score",
-    weight: 17,
+    maxPoints: 17,
     ranged: false,
     scoringCriteria: "Hospital size (beds, procedures/yr), Geography, case mix compatible with device (clinical criteria)",
     note: "May overlap with current tiering",
@@ -31,7 +31,7 @@ const DEFAULT_ICP_COMPONENTS = [
   {
     id: "historical",
     component: "Historical Performance",
-    weight: 42,
+    maxPoints: 42,
     ranged: false,
     scoringCriteria: "Past purchase history with company, revenue contribution, payment reliability",
     note: "May overlap with current tiering. Applies to this product only or across the portfolio?",
@@ -40,7 +40,7 @@ const DEFAULT_ICP_COMPONENTS = [
   {
     id: "timeline",
     component: "Timeline Consideration",
-    weight: 8,
+    maxPoints: 8,
     ranged: false,
     scoringCriteria: "Based on geography and public vs. private. Understanding when a lead plans to purchase is highly important — aligns the lead's buying timeline with the business's sales cycle.",
     note: "",
@@ -49,7 +49,7 @@ const DEFAULT_ICP_COMPONENTS = [
   {
     id: "physicians",
     component: "N° physicians associated to the account",
-    weight: 8,
+    maxPoints: 8,
     ranged: false,
     scoringCriteria: "Increases score based on number of associated physicians",
     note: "",
@@ -58,7 +58,7 @@ const DEFAULT_ICP_COMPONENTS = [
   {
     id: "potential",
     component: "Potential Score",
-    weight: 25,
+    maxPoints: 25,
     ranged: false,
     scoringCriteria: "Estimated procedure volume for product category, budget / purchasing power, competitive products currently in use",
     note: "",
@@ -241,25 +241,26 @@ function ICPScoreTab() {
   const [editingId, setEditingId] = useState(null);
   const [dirty, setDirty] = useState(false);
 
-  // Non-ranged components participate in the 100% weight pool
+  // Non-ranged components participate in the 100-pt pool
   const nonRanged = components.filter((c) => !c.ranged);
-  const total = nonRanged.reduce((s, c) => s + (c.weight || 0), 0);
+  const total = nonRanged.reduce((s, c) => s + (parseInt(c.maxPoints) || 0), 0);
 
-  // Tiering update (tier1/tier2/tier3 — not part of weight pool)
+  // Tiering update (tier1/tier2/tier3 — not part of pts pool)
   const updateTiering = (id, key, value) => {
     setComponents((prev) => prev.map((c) => (c.id === id ? { ...c, [key]: value } : c)));
     setDirty(true);
   };
 
-  // Weight change: auto-redistribute among other non-ranged components
-  const changeWeight = (id, newWeight) => {
+  // Points change: auto-redistribute among other non-ranged components
+  const changePoints = (id, newPts) => {
     setComponents((prev) => {
-      const pool = prev.filter((c) => !c.ranged);
-      const redistributed = redistributeWeights(pool, id, newWeight);
+      // Reuse redistributeWeights — it works identically for integer pools
+      const pool = prev.filter((c) => !c.ranged).map((c) => ({ ...c, weight: c.maxPoints }));
+      const redistributed = redistributeWeights(pool, id, newPts);
       return prev.map((c) => {
         if (c.ranged) return c;
         const updated = redistributed.find((r) => r.id === c.id);
-        return updated || c;
+        return updated ? { ...c, maxPoints: updated.weight } : c;
       });
     });
     setDirty(true);
@@ -276,7 +277,7 @@ function ICPScoreTab() {
       {/* Info banner */}
       <div className="rounded-xl border border-[#fde68a] bg-[#fffbeb] px-5 py-4">
         <p className="text-sm text-[#92400e]">
-          <span className="font-semibold">ICP Score</span> measures how well an account fits your Ideal Customer Profile. Component weights must sum to 100% — adjusting one value automatically redistributes the rest.
+          <span className="font-semibold">ICP Score</span> measures how well an account fits your Ideal Customer Profile. Component points must sum to 100 — adjusting one value automatically redistributes the rest.
         </p>
       </div>
 
@@ -286,7 +287,7 @@ function ICPScoreTab() {
           <thead>
             <tr className="border-b border-[#e5e7eb] bg-[#f9fafb]">
               <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[#6a7282] w-[240px]">Component</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[#6a7282] w-[220px]">Weight</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[#6a7282] w-[220px]">Max Points</th>
               <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[#6a7282]">Scoring Criteria</th>
               <th className="px-6 py-3 w-[52px]" />
             </tr>
@@ -305,10 +306,10 @@ function ICPScoreTab() {
                     </div>
                   </td>
 
-                  {/* Weight column */}
+                  {/* Max Points column */}
                   <td className="px-6 py-4">
                     {comp.ranged ? (
-                      /* Tiering: show three threshold inputs when editing */
+                      /* Tiering: three threshold inputs when editing */
                       isEditing ? (
                         <div className="flex items-center gap-1.5">
                           <input
@@ -339,26 +340,26 @@ function ICPScoreTab() {
                         </span>
                       )
                     ) : (
-                      /* Non-ranged: weight % input + bar */
+                      /* Non-ranged: points input + bar */
                       <div className="flex items-center gap-2">
                         {isEditing ? (
                           <input
                             type="number"
                             min={0}
                             max={100}
-                            value={comp.weight}
-                            onChange={(e) => changeWeight(comp.id, parseInt(e.target.value) || 0)}
+                            value={comp.maxPoints}
+                            onChange={(e) => changePoints(comp.id, parseInt(e.target.value) || 0)}
                             className="w-16 rounded-lg border border-[#155dfc] px-2 py-1 text-center text-sm font-semibold text-[#111318] focus:outline-none focus:ring-1 focus:ring-[#155dfc]"
                           />
                         ) : (
                           <span className="w-16 text-center text-sm font-semibold text-[#111318]">
-                            {comp.weight}%
+                            {comp.maxPoints} pts
                           </span>
                         )}
                         <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#e5e7eb]">
                           <div
                             className="h-full rounded-full bg-[#155dfc] transition-all"
-                            style={{ width: `${comp.weight}%` }}
+                            style={{ width: `${comp.maxPoints}%` }}
                           />
                         </div>
                       </div>
@@ -401,9 +402,9 @@ function ICPScoreTab() {
 
         {/* Footer total */}
         <div className="flex items-center justify-between border-t border-[#e5e7eb] bg-[#f9fafb] px-6 py-3">
-          <span className="text-xs text-[#9ca3af]">Total weight (excluding tiering)</span>
+          <span className="text-xs text-[#9ca3af]">Total max points (excluding tiering)</span>
           <span className={`text-sm font-bold ${total === 100 ? "text-[#16a34a]" : "text-[#f59e0b]"}`}>
-            {total}%
+            {total} pts
           </span>
         </div>
       </div>

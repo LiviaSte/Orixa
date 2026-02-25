@@ -235,24 +235,10 @@ function buildSampleMetrics() {
 
 function buildDefaultAdoptionLadder() {
   const defs = {};
-  const sampleMetrics = buildSampleMetrics();
 
   for (const stage of DEFAULT_STAGES) {
     const def = buildEmptyStageDefinition();
-
-    // Add sample action groups to trigger
-    const relevantMetrics = sampleMetrics.filter(m => m.stageName === stage.name);
-    def.trigger.actionGroups = relevantMetrics.map((metric, idx) => ({
-      id: `group-${stage.id}-${idx}`,
-      type: metric.type,
-      ...(metric.type === "score" ? { threshold: 50, condOp: "≥" } : {}),
-      ...(metric.type === "engagement" ? { minCount: metric.minCount } : {}),
-      ...(metric.type === "reach" ? { minCount: metric.minCount } : {}),
-      source: metric.source,
-      field: metric.field,
-      operator: metric.condOp,
-    }));
-
+    // Triggers start empty — users configure them manually
     defs[stage.id] = def;
   }
 
