@@ -13,11 +13,11 @@ import {
 const navItems = [
   { label: "Data sources", icon: DataSourcesIcon, path: "/" },
   { label: "Domain Definition", icon: DictionaryIcon, path: "/domain-definition" },
-  { label: "Adoption Ladder", icon: LadderIcon, path: "/adoption-ladder" },
-  { label: "Goal Tracking", icon: GoalTrackingIcon, path: "/goal-tracking" },
+  { label: "Funnel", icon: LadderIcon, path: "/adoption-ladder" },
+  { label: "Metric Library", icon: GoalTrackingIcon, path: "/metric-library" },
   { label: "Profiles", icon: ProfilesIcon, path: "/profiles" },
   { label: "Projects", icon: ProjectsIcon, path: "/projects" },
-  { label: "Leading board", icon: LeadingBoardIcon, path: null },
+  { label: "Leading board", icon: LeadingBoardIcon, path: "/leading-board" },
 ];
 
 export default function Sidebar() {

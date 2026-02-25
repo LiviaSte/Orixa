@@ -11,11 +11,10 @@ export default function AdoptionLadderConfig() {
           {/* Header */}
           <div className="flex flex-col gap-1">
             <h1 className="text-2xl font-medium leading-9 text-[#0a0a0a]">
-              Adoption Ladder
+              Funnel
             </h1>
             <p className="max-w-[700px] text-base leading-6 text-[#4a5565]">
-              Define the stages HCPs move through, from unaware to advocate.
-              Drag to reorder, click to expand and configure each stage.
+              Define the stages HCPs move through. Drag to reorder, click to expand and configure each stage.
             </p>
           </div>
 

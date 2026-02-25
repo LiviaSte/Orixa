@@ -554,6 +554,15 @@ export function EditPencilIcon() {
   );
 }
 
+export function CopyIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="5.5" y="5.5" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.25"/>
+      <path d="M10.5 5.5V3.5C10.5 2.67157 9.82843 2 9 2H3.5C2.67157 2 2 2.67157 2 3.5V9C2 9.82843 2.67157 10.5 3.5 10.5H5.5" stroke="currentColor" strokeWidth="1.25"/>
+    </svg>
+  );
+}
+
 export function MoreDotsIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -737,6 +746,34 @@ export function DragHandleIcon() {
       <circle cx="10" cy="8" r="1.25" fill="currentColor"/>
       <circle cx="6" cy="12" r="1.25" fill="currentColor"/>
       <circle cx="10" cy="12" r="1.25" fill="currentColor"/>
+    </svg>
+  );
+}
+
+export function TrendUpSmallIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M1 9L4.5 5.5L7 8L11 3" stroke="#16a34a" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M8 3H11V6" stroke="#16a34a" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function TrendDownSmallIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M1 3L4.5 6.5L7 4L11 9" stroke="#dc2626" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M8 9H11V6" stroke="#dc2626" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+export function ExportIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 10V3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M5 5L8 2L11 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M3 11V13H13V11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }

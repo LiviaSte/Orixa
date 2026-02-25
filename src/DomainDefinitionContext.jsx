@@ -4,88 +4,146 @@ const DomainDefinitionContext = createContext(null);
 
 // ── Concept IDs grouped by tab ─────────────────────────────────
 const TAB_CONCEPT_IDS = {
-  "people-organizations": [
+  people: [
     "hcp",
-    "hcp-specialty",
-    "hcp-tier",
-    "account",
-    "account-hierarchy",
-    "hcp-account-link",
-    "kol",
-  ],
-  "products-therapy": [
-    "product-hierarchy",
-    "product",
-    "competitors",
-    "indication",
-    "product-hcp-relevance",
-  ],
-  "commercial-funnel": [
     "lead",
+    "lead-new",
+    "lead-lapsed",
+    "lead-active",
+    "lead-connected",
+    "lead-qualified",
+    "lead-converted",
+    "contact",
+    "contact-new",
+    "contact-lapsed",
+    "contact-active",
+    "contact-converted",
+    "mql",
+    "mqc",
+    "sql",
     "conversion",
+  ],
+  account: [
+    "account",
+    "account-new",
+    "account-active",
+    "account-inactive",
+    "opportunity",
+    "opp-prospecting",
+    "opp-qualification",
+    "opp-proposal",
+    "opp-negotiation",
+    "opp-closed-won",
+    "opp-closed-lost",
+    "order",
+    "order-draft",
+    "order-activated",
+    "order-cancelled",
+    "contract",
+    "contract-draft",
+    "contract-in-review",
+    "contract-activated",
+    "contract-expired",
+    "asset",
+    "asset-active",
+    "asset-inactive",
+  ],
+  channel: [
     "interaction-types",
-    "interaction-weighting",
-    "call-plan-rules",
+    "digital-channel",
+    "field-force-channel",
+    "channel-attribution",
+    "channel-mix",
   ],
-  "geography-territories": [
-    "territory-structure",
-    "territory-assignment",
-    "territory-overlap-rules",
-    "rep-territory-mapping",
-  ],
-  "metrics-kpis": [
-    "sales-metric",
-    "sales-type",
-    "market-share-definition",
-    "time-periods",
-    "targets-goals",
+  campaign: [
+    "campaign",
+    "campaign-type",
+    "campaign-audience",
+    "campaign-response",
+    "campaign-roi",
+    "content-asset",
   ],
 };
 
 // ── Default names ───────────────────────────────────────────────
 const DEFAULT_NAMES = {
+  // People
   hcp: "HCP",
-  "hcp-specialty": "HCP Specialty",
-  "hcp-tier": "HCP Tier",
-  account: "Account",
-  "account-hierarchy": "Account Hierarchy",
-  "hcp-account-link": "HCP \u2194 Account Link",
-  kol: "KOL",
-  "product-hierarchy": "Product Hierarchy",
-  product: "Product",
-  competitors: "Competitors",
-  indication: "Indication",
-  "product-hcp-relevance": "Product \u2194 HCP Relevance",
   lead: "Lead",
+  "lead-new": "Lead New",
+  "lead-lapsed": "Lead Lapsed",
+  "lead-active": "Lead Active",
+  "lead-connected": "Lead Connected",
+  "lead-qualified": "Lead Qualified",
+  "lead-converted": "Lead Converted",
+  contact: "Contact",
+  "contact-new": "Contact New",
+  "contact-lapsed": "Contact Lapsed",
+  "contact-active": "Contact Active",
+  "contact-converted": "Contact Converted",
+  mql: "MQL",
+  mqc: "MQC",
+  sql: "SQL",
   conversion: "Conversion",
+  // Account
+  account: "Account",
+  "account-new": "Account New",
+  "account-active": "Account Active",
+  "account-inactive": "Account Inactive",
+  opportunity: "Opportunity",
+  "opp-prospecting": "Prospecting",
+  "opp-qualification": "Qualification",
+  "opp-proposal": "Proposal",
+  "opp-negotiation": "Negotiation",
+  "opp-closed-won": "Closed Won",
+  "opp-closed-lost": "Closed Lost",
+  order: "Order",
+  "order-draft": "Order Draft",
+  "order-activated": "Order Activated",
+  "order-cancelled": "Order Cancelled",
+  contract: "Contract",
+  "contract-draft": "Contract Draft",
+  "contract-in-review": "Contract In Review",
+  "contract-activated": "Contract Activated",
+  "contract-expired": "Contract Expired",
+  asset: "Asset",
+  "asset-active": "Asset Active",
+  "asset-inactive": "Asset Inactive",
+  // Channel
   "interaction-types": "Interaction Types",
-  "interaction-weighting": "Interaction Weighting",
-  "call-plan-rules": "Call Plan Rules",
-  "territory-structure": "Territory Structure",
-  "territory-assignment": "Territory Assignment",
-  "territory-overlap-rules": "Territory Overlap Rules",
-  "rep-territory-mapping": "Rep\u2013Territory Mapping",
-  "sales-metric": "Sales Metric",
-  "sales-type": "Sales Type",
-  "market-share-definition": "Market Share Definition",
-  "time-periods": "Time Periods",
-  "targets-goals": "Targets/Goals",
+  "digital-channel": "Digital Channel",
+  "field-force-channel": "Field Force Channel",
+  "channel-attribution": "Channel Attribution",
+  "channel-mix": "Channel Mix",
+  // Campaign
+  campaign: "Campaign",
+  "campaign-type": "Campaign Type",
+  "campaign-audience": "Campaign Audience",
+  "campaign-response": "Campaign Response",
+  "campaign-roi": "Campaign ROI",
+  "content-asset": "Content Asset",
 };
 
 // ── Status computation ──────────────────────────────────────────
-function computeStatus({ definition, source, conditions, constraints }) {
+function computeStatus({ definition, sources, constraints }) {
   const hasDefinition = definition && definition.trim() !== "";
-  const hasSource = source && source.trim() !== "";
-  const hasConditions =
-    conditions &&
-    conditions.length > 0 &&
-    conditions.some((c) => c.field && c.operator && c.value);
+  const hasSources =
+    sources &&
+    sources.length > 0 &&
+    sources.some(
+      (s) =>
+        s.source &&
+        s.source.trim() !== "" &&
+        s.conditions.length > 0 &&
+        s.conditions.some((c) => c.field && c.operator && c.value)
+    );
+  const hasAnySource =
+    sources && sources.length > 0 && sources.some((s) => s.source && s.source.trim() !== "");
 
-  if (hasDefinition && hasSource && hasConditions) return "defined";
+  if (hasDefinition && hasSources) return "defined";
   if (
     hasDefinition ||
-    hasSource ||
-    hasConditions ||
+    hasAnySource ||
     (constraints && constraints.trim() !== "")
   )
     return "needs_attention";
@@ -100,10 +158,8 @@ function buildInitialState() {
       state[id] = {
         name: DEFAULT_NAMES[id] || id,
         definition: "",
-        source: "",
-        sourceField: "",
-        conditions: [],
-        conditionOperators: {},
+        sources: [],
+        sourceOperators: {},
         constraints: "",
         status: "not_configured",
       };
@@ -116,37 +172,90 @@ function buildInitialState() {
 function buildEmptyStageDefinition() {
   return {
     definition: "",
-    detectionMethod: "rep-assessed",
+    detectionMethod: "data-driven",
     entryCriteria: {
       conditions: [],
       conditionOperators: {},
       source: "",
       sourceField: "",
     },
+    trigger: {
+      scoreThreshold: "",
+      actionGroups: [], // each: { id, type: "reach"|"engagement"|"mix", minCount: "", operator: "AND"|"OR" }
+      groupOperator: "AND",
+      customRules: [],
+      customRuleOperators: {},
+      thenActions: [], // each: { id, value: string }
+    },
     exitRules: [],
     operationalContext: {
       expectedDuration: "",
       flagStuckAfter: "",
-      keyBarriers: "",
-      recommendedActions: "",
     },
   };
 }
 
 const DEFAULT_STAGES = [
-  { id: "stage-1", name: "Unaware", order: 0 },
-  { id: "stage-2", name: "Aware", order: 1 },
-  { id: "stage-3", name: "Interested", order: 2 },
-  { id: "stage-4", name: "Trialist", order: 3 },
-  { id: "stage-5", name: "Adopter", order: 4 },
-  { id: "stage-6", name: "Advocate", order: 5 },
+  { id: "stage-1", name: "Lead", order: 0, type: "hcp" },
+  { id: "stage-2", name: "MQL", order: 1, type: "hcp" },
+  { id: "stage-3", name: "SQL", order: 2, type: "hcp" },
+  { id: "stage-4", name: "Opportunity", order: 3, type: "account" },
+  { id: "stage-5", name: "Closed Won", order: 4, type: "account", terminal: true },
+  { id: "stage-6", name: "Closed Lost", order: 5, type: "account", terminal: true },
 ];
+
+function buildSampleMetrics() {
+  // Sample metrics for different channels
+  const sampleMetrics = [
+    // Email metrics
+    { type: "engagement", minCount: 1, source: "Marketing Cloud", field: "Email.Opened", condOp: "≥", channel: "Email", stageName: "Lead" },
+    { type: "engagement", minCount: 2, source: "Salesforce", field: "Email.Clicked", condOp: "≥", channel: "Email", stageName: "MQL" },
+    { type: "reach", minCount: 3, source: "Marketing Cloud", field: "Email.Delivered", condOp: "≥", channel: "Email", stageName: "Lead" },
+
+    // Call/F2F metrics
+    { type: "engagement", minCount: 1, source: "Salesforce", field: "Call.Duration", condOp: "≥", channel: "F2F", stageName: "SQL" },
+    { type: "reach", minCount: 2, source: "Veeva CRM", field: "Visit.Count", condOp: "≥", channel: "F2F", stageName: "MQL" },
+
+    // Webinar metrics
+    { type: "engagement", minCount: 1, source: "Veeva CRM", field: "Webinar.Attended", condOp: "≥", channel: "Webinar", stageName: "Lead" },
+    { type: "reach", minCount: 1, source: "Marketo", field: "Webinar.Registered", condOp: "≥", channel: "Webinar", stageName: "MQL" },
+
+    // Events metrics
+    { type: "engagement", minCount: 1, source: "Manual database", field: "Event.Attendance", condOp: "≥", channel: "Events", stageName: "Lead" },
+    { type: "reach", minCount: 1, source: "Veeva CRM", field: "Congress.Attended", condOp: "≥", channel: "Congress", stageName: "SQL" },
+
+    // Web metrics
+    { type: "engagement", minCount: 2, source: "Google Analytics", field: "Web.PageViews", condOp: "≥", channel: "Web", stageName: "Lead" },
+    { type: "reach", minCount: 1, source: "Google Analytics", field: "Web.SessionCount", condOp: "≥", channel: "Web", stageName: "MQL" },
+    { type: "engagement", minCount: 3, source: "Marketing Cloud", field: "Web.FormSubmit", condOp: "≥", channel: "Web", stageName: "SQL" },
+  ];
+
+  return sampleMetrics;
+}
 
 function buildDefaultAdoptionLadder() {
   const defs = {};
+  const sampleMetrics = buildSampleMetrics();
+
   for (const stage of DEFAULT_STAGES) {
-    defs[stage.id] = buildEmptyStageDefinition();
+    const def = buildEmptyStageDefinition();
+
+    // Add sample action groups to trigger
+    const relevantMetrics = sampleMetrics.filter(m => m.stageName === stage.name);
+    def.trigger.actionGroups = relevantMetrics.map((metric, idx) => ({
+      id: `group-${stage.id}-${idx}`,
+      type: metric.type,
+      ...(metric.type === "score" ? { threshold: 50, condOp: "≥" } : {}),
+      ...(metric.type === "engagement" ? { minCount: metric.minCount } : {}),
+      ...(metric.type === "reach" ? { minCount: metric.minCount } : {}),
+      source: metric.source,
+      field: metric.field,
+      operator: metric.condOp,
+    }));
+
+    defs[stage.id] = def;
   }
+
   return {
     stages: DEFAULT_STAGES.map((s) => ({ ...s })),
     settings: {
@@ -177,7 +286,7 @@ function computeAdoptionLadderStatus(ladder) {
       def.entryCriteria.conditions.length > 0 &&
       def.entryCriteria.conditions.some((c) => c.field && c.operator && c.value);
     const isFirst = stage.order === 0;
-    const isLast = stage.order === stages.length - 1;
+    const isLast = stage.terminal === true || stage.order === stages.length - 1;
     const hasExit = isLast || def.exitRules.length > 0;
 
     if (hasDef && (hasEntry || isFirst) && hasExit) {
@@ -196,6 +305,7 @@ function computeAdoptionLadderStatus(ladder) {
 export function DomainDefinitionProvider({ children }) {
   const [concepts, setConcepts] = useState(buildInitialState);
   const [customDefaults, setCustomDefaultsState] = useState({});
+  const [customConcepts, setCustomConcepts] = useState([]);
   const [adoptionLadder, setAdoptionLadder] = useState(buildDefaultAdoptionLadder);
 
   // ═══ Concept actions ══════════════════════════════════════════
@@ -205,86 +315,160 @@ export function DomainDefinitionProvider({ children }) {
       const current = prev[conceptId];
       if (!current) return prev;
       const updated = { ...current, [field]: value };
-      if (field === "source") {
-        updated.sourceField = "";
-      }
       updated.status = computeStatus(updated);
       return { ...prev, [conceptId]: updated };
     });
   };
 
-  const addCondition = (conceptId) => {
+  // ── Multi-source actions ──────────────────────────────────────
+
+  const addSource = (conceptId) => {
     setConcepts((prev) => {
       const current = prev[conceptId];
       if (!current) return prev;
-      const newCondition = {
-        id: Date.now() + Math.random(),
-        field: "",
-        operator: "",
-        value: "",
+      const newSource = {
+        id: `src-${Date.now()}-${Math.random()}`,
+        source: "",
+        manualDb: "",
+        conditions: [],
+        conditionOperators: {},
       };
       const updated = {
         ...current,
-        conditions: [...current.conditions, newCondition],
+        sources: [...current.sources, newSource],
       };
       updated.status = computeStatus(updated);
       return { ...prev, [conceptId]: updated };
     });
   };
 
-  const removeCondition = (conceptId, conditionId) => {
+  const removeSource = (conceptId, sourceId) => {
     setConcepts((prev) => {
       const current = prev[conceptId];
       if (!current) return prev;
-
-      const oldConditions = current.conditions;
-      const removedIndex = oldConditions.findIndex((c) => c.id === conditionId);
-      if (removedIndex === -1) return prev;
-
-      const newConditions = oldConditions.filter((c) => c.id !== conditionId);
-      const oldOps = current.conditionOperators;
+      const oldSources = current.sources;
+      const removedIdx = oldSources.findIndex((s) => s.id === sourceId);
+      if (removedIdx === -1) return prev;
+      const newSources = oldSources.filter((s) => s.id !== sourceId);
+      // Rebuild sourceOperators
+      const oldOps = current.sourceOperators || {};
       const newOps = {};
-      let newGap = 0;
-      for (let i = 0; i < oldConditions.length - 1; i++) {
-        if (i === removedIndex || i === removedIndex - 1) {
-          if (i === removedIndex - 1 && removedIndex < oldConditions.length - 1) {
-            newOps[newGap] = oldOps[i] || "AND";
-            newGap++;
+      let gap = 0;
+      for (let i = 0; i < oldSources.length - 1; i++) {
+        if (i === removedIdx || i === removedIdx - 1) {
+          if (i === removedIdx - 1 && removedIdx < oldSources.length - 1) {
+            newOps[gap] = oldOps[i] || "AND";
+            gap++;
           }
           continue;
         }
-        newOps[newGap] = oldOps[i] || "AND";
-        newGap++;
+        newOps[gap] = oldOps[i] || "AND";
+        gap++;
       }
-
       const updated = {
         ...current,
-        conditions: newConditions,
-        conditionOperators: newOps,
+        sources: newSources,
+        sourceOperators: newOps,
       };
       updated.status = computeStatus(updated);
       return { ...prev, [conceptId]: updated };
     });
   };
 
-  const updateCondition = (conceptId, conditionId, field, value) => {
+  const updateSourceField = (conceptId, sourceId, field, value) => {
     setConcepts((prev) => {
       const current = prev[conceptId];
       if (!current) return prev;
-      const newConditions = current.conditions.map((c) => {
-        if (c.id !== conditionId) return c;
-        if (field === "field") {
-          return { ...c, field: value, operator: "", value: "" };
-        }
-        return { ...c, [field]: value };
-      });
-      const updated = { ...current, conditions: newConditions };
+      const updated = {
+        ...current,
+        sources: current.sources.map((s) => {
+          if (s.id !== sourceId) return s;
+          if (field === "source") {
+            return { ...s, source: value, manualDb: "", conditions: [], conditionOperators: {} };
+          }
+          return { ...s, [field]: value };
+        }),
+      };
       updated.status = computeStatus(updated);
       return { ...prev, [conceptId]: updated };
     });
   };
 
-  const setConditionOperator = (conceptId, gapIndex, value) => {
+  const addSourceCondition = (conceptId, sourceId) => {
+    setConcepts((prev) => {
+      const current = prev[conceptId];
+      if (!current) return prev;
+      const newCond = { id: Date.now() + Math.random(), field: "", operator: "", value: "" };
+      const updated = {
+        ...current,
+        sources: current.sources.map((s) => {
+          if (s.id !== sourceId) return s;
+          return { ...s, conditions: [...s.conditions, newCond] };
+        }),
+      };
+      updated.status = computeStatus(updated);
+      return { ...prev, [conceptId]: updated };
+    });
+  };
+
+  const removeSourceCondition = (conceptId, sourceId, conditionId) => {
+    setConcepts((prev) => {
+      const current = prev[conceptId];
+      if (!current) return prev;
+      const updated = {
+        ...current,
+        sources: current.sources.map((s) => {
+          if (s.id !== sourceId) return s;
+          const oldConds = s.conditions;
+          const removedIdx = oldConds.findIndex((c) => c.id === conditionId);
+          if (removedIdx === -1) return s;
+          const newConds = oldConds.filter((c) => c.id !== conditionId);
+          const oldOps = s.conditionOperators;
+          const newOps = {};
+          let gap = 0;
+          for (let i = 0; i < oldConds.length - 1; i++) {
+            if (i === removedIdx || i === removedIdx - 1) {
+              if (i === removedIdx - 1 && removedIdx < oldConds.length - 1) {
+                newOps[gap] = oldOps[i] || "AND";
+                gap++;
+              }
+              continue;
+            }
+            newOps[gap] = oldOps[i] || "AND";
+            gap++;
+          }
+          return { ...s, conditions: newConds, conditionOperators: newOps };
+        }),
+      };
+      updated.status = computeStatus(updated);
+      return { ...prev, [conceptId]: updated };
+    });
+  };
+
+  const updateSourceCondition = (conceptId, sourceId, conditionId, field, value) => {
+    setConcepts((prev) => {
+      const current = prev[conceptId];
+      if (!current) return prev;
+      const updated = {
+        ...current,
+        sources: current.sources.map((s) => {
+          if (s.id !== sourceId) return s;
+          return {
+            ...s,
+            conditions: s.conditions.map((c) => {
+              if (c.id !== conditionId) return c;
+              if (field === "field") return { ...c, field: value, operator: "", value: "" };
+              return { ...c, [field]: value };
+            }),
+          };
+        }),
+      };
+      updated.status = computeStatus(updated);
+      return { ...prev, [conceptId]: updated };
+    });
+  };
+
+  const setSourceConditionOperator = (conceptId, sourceId, gapIndex, value) => {
     setConcepts((prev) => {
       const current = prev[conceptId];
       if (!current) return prev;
@@ -292,13 +476,70 @@ export function DomainDefinitionProvider({ children }) {
         ...prev,
         [conceptId]: {
           ...current,
-          conditionOperators: {
-            ...current.conditionOperators,
-            [gapIndex]: value,
-          },
+          sources: current.sources.map((s) => {
+            if (s.id !== sourceId) return s;
+            return {
+              ...s,
+              conditionOperators: { ...s.conditionOperators, [gapIndex]: value },
+            };
+          }),
         },
       };
     });
+  };
+
+  const setSourceOperator = (conceptId, gapIndex, value) => {
+    setConcepts((prev) => {
+      const current = prev[conceptId];
+      if (!current) return prev;
+      return {
+        ...prev,
+        [conceptId]: {
+          ...current,
+          sourceOperators: { ...(current.sourceOperators || {}), [gapIndex]: value },
+        },
+      };
+    });
+  };
+
+  // ── Copy / duplicate concept ─────────────────────────────────
+
+  const duplicateConcept = (conceptId, tabKey, conceptMeta) => {
+    const newId = `${conceptId}-copy-${Date.now()}`;
+
+    setConcepts((prev) => {
+      const original = prev[conceptId];
+      if (!original) return prev;
+      const cloned = {
+        ...original,
+        name: `${original.name} (copy)`,
+        sources: original.sources.map((s) => ({
+          ...s,
+          id: `src-${Date.now()}-${Math.random()}`,
+          conditions: s.conditions.map((c) => ({
+            ...c,
+            id: Date.now() + Math.random(),
+          })),
+          conditionOperators: { ...s.conditionOperators },
+        })),
+        sourceOperators: { ...(original.sourceOperators || {}) },
+      };
+      cloned.status = computeStatus(cloned);
+      return { ...prev, [newId]: cloned };
+    });
+
+    setCustomConcepts((prev) => [
+      ...prev,
+      {
+        id: newId,
+        tabKey,
+        concept: {
+          ...conceptMeta,
+          id: newId,
+          defaultName: `${conceptMeta.defaultName} (copy)`,
+        },
+      },
+    ]);
   };
 
   const setCustomDefault = (conceptId, text) => {
@@ -324,7 +565,11 @@ export function DomainDefinitionProvider({ children }) {
   };
 
   const getTabStats = (tabKey) => {
-    const ids = TAB_CONCEPT_IDS[tabKey] || [];
+    const staticIds = TAB_CONCEPT_IDS[tabKey] || [];
+    const customIds = customConcepts
+      .filter((cc) => cc.tabKey === tabKey)
+      .map((cc) => cc.id);
+    const ids = [...staticIds, ...customIds];
     const total = ids.length;
     const configured = ids.filter((id) => concepts[id]?.status === "defined").length;
     return { configured, total };
@@ -541,7 +786,7 @@ export function DomainDefinitionProvider({ children }) {
 
   // ── Exit rules ────────────────────────────────────────────────
 
-  const addExitRule = (stageId) => {
+  const addExitRule = (stageId, defaultMovesTo = "") => {
     setAdoptionLadder((prev) => {
       const def = prev.stageDefinitions[stageId];
       if (!def) return prev;
@@ -549,7 +794,7 @@ export function DomainDefinitionProvider({ children }) {
         id: Date.now() + Math.random(),
         conditions: [],
         conditionOperators: {},
-        movesTo: "",
+        movesTo: defaultMovesTo,
         source: "",
         sourceField: "",
       };
@@ -732,6 +977,182 @@ export function DomainDefinitionProvider({ children }) {
     });
   };
 
+  // ── Trigger actions ───────────────────────────────────────────
+
+  const updateTrigger = (stageId, field, value) => {
+    setAdoptionLadder((prev) => {
+      const def = prev.stageDefinitions[stageId];
+      if (!def) return prev;
+      return {
+        ...prev,
+        stageDefinitions: {
+          ...prev.stageDefinitions,
+          [stageId]: {
+            ...def,
+            trigger: { ...(def.trigger || {}), [field]: value },
+          },
+        },
+      };
+    });
+  };
+
+  const addActionGroup = (stageId) => {
+    setAdoptionLadder((prev) => {
+      const def = prev.stageDefinitions[stageId];
+      if (!def) return prev;
+      const newGroup = {
+        id: `ag-${Date.now()}-${Math.random()}`,
+        type: "score",
+        condOp: "≥",
+        threshold: "",
+        minCount: "",
+        // custom condition fields
+        source: "",
+        field: "",
+        operator: "",
+        value: "",
+      };
+      return {
+        ...prev,
+        stageDefinitions: {
+          ...prev.stageDefinitions,
+          [stageId]: {
+            ...def,
+            trigger: {
+              ...(def.trigger || {}),
+              actionGroups: [...(def.trigger?.actionGroups || []), newGroup],
+            },
+          },
+        },
+      };
+    });
+  };
+
+  const updateActionGroup = (stageId, groupId, field, value) => {
+    setAdoptionLadder((prev) => {
+      const def = prev.stageDefinitions[stageId];
+      if (!def) return prev;
+      return {
+        ...prev,
+        stageDefinitions: {
+          ...prev.stageDefinitions,
+          [stageId]: {
+            ...def,
+            trigger: {
+              ...(def.trigger || {}),
+              actionGroups: (def.trigger?.actionGroups || []).map((g) =>
+                g.id === groupId ? { ...g, [field]: value } : g
+              ),
+            },
+          },
+        },
+      };
+    });
+  };
+
+  const removeActionGroup = (stageId, groupId) => {
+    setAdoptionLadder((prev) => {
+      const def = prev.stageDefinitions[stageId];
+      if (!def) return prev;
+      return {
+        ...prev,
+        stageDefinitions: {
+          ...prev.stageDefinitions,
+          [stageId]: {
+            ...def,
+            trigger: {
+              ...(def.trigger || {}),
+              actionGroups: (def.trigger?.actionGroups || []).filter((g) => g.id !== groupId),
+            },
+          },
+        },
+      };
+    });
+  };
+
+  const addCustomRule = (stageId) => {
+    setAdoptionLadder((prev) => {
+      const def = prev.stageDefinitions[stageId];
+      if (!def) return prev;
+      const newRule = { id: `cr-${Date.now()}-${Math.random()}`, field: "", operator: "", value: "" };
+      return {
+        ...prev,
+        stageDefinitions: {
+          ...prev.stageDefinitions,
+          [stageId]: {
+            ...def,
+            trigger: {
+              ...(def.trigger || {}),
+              customRules: [...(def.trigger?.customRules || []), newRule],
+            },
+          },
+        },
+      };
+    });
+  };
+
+  const updateCustomRule = (stageId, ruleId, field, value) => {
+    setAdoptionLadder((prev) => {
+      const def = prev.stageDefinitions[stageId];
+      if (!def) return prev;
+      return {
+        ...prev,
+        stageDefinitions: {
+          ...prev.stageDefinitions,
+          [stageId]: {
+            ...def,
+            trigger: {
+              ...(def.trigger || {}),
+              customRules: (def.trigger?.customRules || []).map((r) =>
+                r.id === ruleId ? { ...r, [field]: value } : r
+              ),
+            },
+          },
+        },
+      };
+    });
+  };
+
+  const removeCustomRule = (stageId, ruleId) => {
+    setAdoptionLadder((prev) => {
+      const def = prev.stageDefinitions[stageId];
+      if (!def) return prev;
+      return {
+        ...prev,
+        stageDefinitions: {
+          ...prev.stageDefinitions,
+          [stageId]: {
+            ...def,
+            trigger: {
+              ...(def.trigger || {}),
+              customRules: (def.trigger?.customRules || []).filter((r) => r.id !== ruleId),
+            },
+          },
+        },
+      };
+    });
+  };
+
+  const setCustomRuleOperator = (stageId, gapIndex, value) => {
+    setAdoptionLadder((prev) => {
+      const def = prev.stageDefinitions[stageId];
+      if (!def) return prev;
+      return {
+        ...prev,
+        stageDefinitions: {
+          ...prev.stageDefinitions,
+          [stageId]: {
+            ...def,
+            trigger: {
+              ...(def.trigger || {}),
+              customRuleOperators: { ...(def.trigger?.customRuleOperators || {}), [gapIndex]: value },
+            },
+          },
+        },
+      };
+    });
+  };
+
   // ── Operational context ───────────────────────────────────────
 
   const updateOperationalContext = (stageId, field, value) => {
@@ -759,11 +1180,17 @@ export function DomainDefinitionProvider({ children }) {
         // Concept state
         concepts,
         customDefaults,
+        customConcepts,
         updateConcept,
-        addCondition,
-        removeCondition,
-        updateCondition,
-        setConditionOperator,
+        addSource,
+        removeSource,
+        updateSourceField,
+        addSourceCondition,
+        removeSourceCondition,
+        updateSourceCondition,
+        setSourceConditionOperator,
+        setSourceOperator,
+        duplicateConcept,
         resetDefinition,
         setCustomDefault,
         clearCustomDefault,
@@ -790,6 +1217,15 @@ export function DomainDefinitionProvider({ children }) {
         updateExitRuleCondition,
         setExitRuleConditionOperator,
         updateOperationalContext,
+        // Trigger actions
+        updateTrigger,
+        addActionGroup,
+        updateActionGroup,
+        removeActionGroup,
+        addCustomRule,
+        updateCustomRule,
+        removeCustomRule,
+        setCustomRuleOperator,
       }}
     >
       {children}

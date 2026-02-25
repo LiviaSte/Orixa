@@ -10,7 +10,9 @@ export default function SearchableDropdown({
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [dropdownWidth, setDropdownWidth] = useState("auto");
   const containerRef = useRef(null);
+  const triggerRef = useRef(null);
   const inputRef = useRef(null);
 
   // Outside click detection
@@ -24,6 +26,14 @@ export default function SearchableDropdown({
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  // Calculate dropdown width to match trigger button
+  useEffect(() => {
+    if (open && triggerRef.current) {
+      const width = triggerRef.current.offsetWidth;
+      setDropdownWidth(`${width}px`);
+    }
   }, [open]);
 
   // Auto-focus search input when opened
@@ -51,6 +61,7 @@ export default function SearchableDropdown({
       {/* Trigger */}
       {!open ? (
         <button
+          ref={triggerRef}
           onClick={() => setOpen(true)}
           className="flex w-full items-center justify-between rounded-lg border border-[#e5e7eb] bg-white px-3.5 py-2 text-left text-sm transition-colors hover:border-[#d1d5dc] focus:border-[#155dfc] focus:outline-none focus:ring-1 focus:ring-[#155dfc]"
         >
@@ -104,7 +115,10 @@ export default function SearchableDropdown({
 
       {/* Dropdown panel */}
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-1 max-h-52 w-full overflow-auto rounded-lg border border-[#e5e7eb] bg-white shadow-lg">
+        <div
+          className="absolute left-0 top-full z-50 mt-1 max-h-52 overflow-auto rounded-lg border border-[#e5e7eb] bg-white shadow-lg"
+          style={{ width: dropdownWidth }}
+        >
           {filtered.length > 0 ? (
             filtered.map((option) => (
               <button

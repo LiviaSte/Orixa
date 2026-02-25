@@ -42,6 +42,28 @@ const conditionsByType = {
   "Product Demo Request": ["requested", "completed", "at least"],
 };
 
+// ── Natural-language formatter for goal preview bullets ──────────
+function formatTriggerText({ type, condition, number }) {
+  const n = number || "";
+  const c = condition || "";
+  switch (type) {
+    case "Attended Medical Congress":
+      return `attended ${c} ${n} medical congress${n !== "1" ? "es" : ""}`.trim();
+    case "Email Engagement":
+      return `had ${c ? `${c} ` : ""}${n ? `${n} ` : ""}email engagement${n !== "1" ? "s" : ""}`.trim();
+    case "Web Visit":
+      return `${c || "visited"} ${n ? `${n} ` : ""}web page${n !== "1" ? "s" : ""}`.trim();
+    case "Content Download":
+      return `${c || "downloaded"} ${n ? `${n} ` : ""}content piece${n !== "1" ? "s" : ""}`.trim();
+    case "Sales Meeting":
+      return `${c || "attended"} ${n ? `${n} ` : ""}sales meeting${n !== "1" ? "s" : ""}`.trim();
+    case "Product Demo Request":
+      return `${c || "requested"} ${n ? `${n} ` : ""}product demo${n !== "1" ? "s" : ""}`.trim();
+    default:
+      return `${type?.toLowerCase() || ""} ${c} ${n}`.trim();
+  }
+}
+
 const sourcesByType = {
   "Attended Medical Congress": ["Manual database", "Veeva CRM", "Salesforce", "Event platform"],
   "Email Engagement": ["Marketo", "Salesforce Marketing Cloud", "HubSpot", "Mailchimp"],
@@ -194,27 +216,14 @@ export default function OpportunityCreation() {
     );
   };
 
-  // Build preview text
-  const previewParts = triggers
+  // Build structured preview data
+  const previewTriggers = triggers
     .filter((t) => t.type)
-    .map((t, i) => {
-      let text = t.type;
-      if (t.condition) text += ` - ${t.condition}`;
-      if (t.number) text += ` ${t.number}`;
-      if (t.target) text += ` from ${t.target}`;
-      return { text, index: i };
-    });
-
-  let previewText = "No triggers defined yet";
-  if (previewParts.length > 0) {
-    previewText = previewParts
-      .map((p, i) => {
-        if (i === 0) return p.text;
-        const op = getOperator(i - 1);
-        return `${op} ${p.text}`;
-      })
-      .join(" ");
-  }
+    .map((t) => ({
+      type: t.type,
+      condition: t.condition || null,
+      number: t.number || null,
+    }));
 
   const handleSave = () => {
     saveOpportunity({ triggers, operators, fromStage, toStage });
@@ -411,101 +420,60 @@ export default function OpportunityCreation() {
                     <div className="flex flex-1 flex-col gap-4 rounded-xl border border-[#e5e7eb] bg-white p-5 shadow-sm">
                       {saved ? (
                         /* ── Read-only view ── */
-                        <>
+                        <div className="grid grid-cols-3 gap-4">
                           <ReadOnlyField label="Type" value={trigger.type} />
-                          {trigger.type && (
-                            <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-                              <ReadOnlyField label="Condition" value={trigger.condition} />
-                              <ReadOnlyField label="Number" value={trigger.number ? `${trigger.number} min` : ""} />
-                              <ReadOnlyField label="Source" value={trigger.source} />
-                              <ReadOnlyField label="Target" value={trigger.target} />
-                            </div>
-                          )}
-                        </>
+                          <ReadOnlyField label="Condition" value={trigger.condition} />
+                          <ReadOnlyField label="Number" value={trigger.number ? `${trigger.number} min` : ""} />
+                        </div>
                       ) : (
                         /* ── Edit view ── */
                         <>
-                          {/* Type — always visible */}
-                          <div className="flex flex-col gap-2">
-                            <label className="text-xs font-bold uppercase tracking-[0.6px] text-[#616f89]">
-                              Type
-                            </label>
-                            <Dropdown
-                              value={trigger.type}
-                              options={typeOptions}
-                              onChange={(val) => updateTrigger(trigger.id, "type", val)}
-                              placeholder="Select type..."
-                            />
+                          {/* Type, Condition, Number — all in one row */}
+                          <div className="grid grid-cols-3 gap-4">
+                            <div className="flex flex-col gap-2">
+                              <label className="text-xs font-bold uppercase tracking-[0.6px] text-[#616f89]">
+                                Type
+                              </label>
+                              <Dropdown
+                                value={trigger.type}
+                                options={typeOptions}
+                                onChange={(val) => updateTrigger(trigger.id, "type", val)}
+                                placeholder="Select type..."
+                              />
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                              <label className="text-xs font-bold uppercase tracking-[0.6px] text-[#616f89]">
+                                Condition
+                              </label>
+                              <Dropdown
+                                value={trigger.type ? trigger.condition : ""}
+                                options={trigger.type ? (conditionsByType[trigger.type] || []) : []}
+                                onChange={(val) => updateTrigger(trigger.id, "condition", val)}
+                                placeholder={trigger.type ? "Select..." : "Select type first"}
+                              />
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                              <label className="text-xs font-bold uppercase tracking-[0.6px] text-[#616f89]">
+                                Number
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="text"
+                                  value={trigger.number}
+                                  onChange={(e) =>
+                                    updateTrigger(trigger.id, "number", e.target.value)
+                                  }
+                                  placeholder="0"
+                                  className="w-full rounded-lg border border-[#e5e7eb] bg-white py-2 pl-3.5 pr-10 text-sm text-[#111318] placeholder:text-[#9ca3af] focus:border-[#155dfc] focus:outline-none focus:ring-1 focus:ring-[#155dfc]"
+                                />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#616f89]">
+                                  min
+                                </span>
+                              </div>
+                            </div>
                           </div>
-
-                          {/* Condition, Number, Source, Target */}
-                          {trigger.type && (
-                            <>
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="flex flex-col gap-2">
-                                  <label className="text-xs font-bold uppercase tracking-[0.6px] text-[#616f89]">
-                                    Condition
-                                  </label>
-                                  <Dropdown
-                                    value={trigger.condition}
-                                    options={conditionsByType[trigger.type] || []}
-                                    onChange={(val) => updateTrigger(trigger.id, "condition", val)}
-                                    placeholder="Select..."
-                                  />
-                                </div>
-
-                                <div className="flex flex-col gap-2">
-                                  <label className="text-xs font-bold uppercase tracking-[0.6px] text-[#616f89]">
-                                    Number
-                                  </label>
-                                  <div className="relative">
-                                    <input
-                                      type="text"
-                                      value={trigger.number}
-                                      onChange={(e) =>
-                                        updateTrigger(trigger.id, "number", e.target.value)
-                                      }
-                                      placeholder="0"
-                                      className="w-full rounded-lg border border-[#e5e7eb] bg-white py-2 pl-3.5 pr-10 text-sm text-[#111318] placeholder:text-[#9ca3af] focus:border-[#155dfc] focus:outline-none focus:ring-1 focus:ring-[#155dfc]"
-                                    />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#616f89]">
-                                      min
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="flex flex-col gap-2">
-                                  <label className="text-xs font-bold uppercase tracking-[0.6px] text-[#616f89]">
-                                    Source
-                                  </label>
-                                  <Dropdown
-                                    value={trigger.source}
-                                    options={sourcesByType[trigger.type] || []}
-                                    onChange={(val) => updateTrigger(trigger.id, "source", val)}
-                                    placeholder="Select source..."
-                                  />
-                                </div>
-
-                                <div className="flex flex-col gap-2">
-                                  <label className="text-xs font-bold uppercase tracking-[0.6px] text-[#616f89]">
-                                    Target
-                                  </label>
-                                  <Dropdown
-                                    value={trigger.target}
-                                    options={
-                                      trigger.source && targetsBySource[trigger.type]
-                                        ? targetsBySource[trigger.type][trigger.source] || []
-                                        : []
-                                    }
-                                    onChange={(val) => updateTrigger(trigger.id, "target", val)}
-                                    placeholder={trigger.source ? "Select target..." : "Select source first"}
-                                  />
-                                </div>
-                              </div>
-                            </>
-                          )}
 
                           {/* Delete trigger */}
                           <button
@@ -591,12 +559,34 @@ export default function OpportunityCreation() {
             </div>
           </div>
 
-          {/* ═══ Preview Section ═══ */}
+          {/* ═══ Goal Preview Section ═══ */}
           <div className="flex flex-col gap-2 rounded-[10px] border border-[#e5e7eb] bg-white px-[17px] pb-4 pt-[17px]">
-            <span className="text-xs font-medium text-[#4a5565]">Preview</span>
-            <p className="text-sm font-medium text-[#0a0a0a]">
-              {previewText}
-            </p>
+            <span className="text-xs font-medium text-[#4a5565]">
+              Goal preview
+            </span>
+            {previewTriggers.length === 0 ? (
+              <p className="text-sm text-[#9ca3af]">
+                No triggers defined yet
+              </p>
+            ) : (
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-medium text-[#0a0a0a]">
+                  To move from &ldquo;{fromStage}&rdquo; to &ldquo;{toStage},&rdquo; the HCP must:
+                </p>
+                {previewTriggers.map((t, i) => (
+                  <div key={i}>
+                    {i > 0 && (
+                      <p className="py-0.5 pl-4 text-xs font-bold text-[#135bec]">
+                        {getOperator(i - 1)}
+                      </p>
+                    )}
+                    <p className="pl-4 text-sm text-[#0a0a0a]">
+                      &bull; Have {formatTriggerText(t)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </main>
