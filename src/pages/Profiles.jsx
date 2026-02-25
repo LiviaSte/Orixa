@@ -237,9 +237,6 @@ export default function Profiles() {
               <button className="rounded-[10px] border border-[#d1d5dc] px-4 py-2 text-sm font-medium text-[#0a0a0a] transition-colors hover:bg-gray-50">
                 Export
               </button>
-              <button className="rounded-[10px] bg-[#101828] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1d2939]">
-                Add profile
-              </button>
             </div>
           </div>
 
