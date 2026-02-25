@@ -10,7 +10,7 @@ const DEFAULT_ICP_COMPONENTS = [
   {
     id: "tiering",
     component: "Current Tiering",
-    // Three editable tier values
+    // Three editable tier values (points thresholds, not part of the 100% weight)
     tier1: 33,
     tier2: 66,
     tier3: 100,
@@ -22,7 +22,7 @@ const DEFAULT_ICP_COMPONENTS = [
   {
     id: "firmographic",
     component: "Firmographic Score",
-    maxPoints: 20,
+    weight: 17,
     ranged: false,
     scoringCriteria: "Hospital size (beds, procedures/yr), Geography, case mix compatible with device (clinical criteria)",
     note: "May overlap with current tiering",
@@ -31,7 +31,7 @@ const DEFAULT_ICP_COMPONENTS = [
   {
     id: "historical",
     component: "Historical Performance",
-    maxPoints: 50,
+    weight: 42,
     ranged: false,
     scoringCriteria: "Past purchase history with company, revenue contribution, payment reliability",
     note: "May overlap with current tiering. Applies to this product only or across the portfolio?",
@@ -40,7 +40,7 @@ const DEFAULT_ICP_COMPONENTS = [
   {
     id: "timeline",
     component: "Timeline Consideration",
-    maxPoints: 10,
+    weight: 8,
     ranged: false,
     scoringCriteria: "Based on geography and public vs. private. Understanding when a lead plans to purchase is highly important — aligns the lead's buying timeline with the business's sales cycle.",
     note: "",
@@ -49,7 +49,7 @@ const DEFAULT_ICP_COMPONENTS = [
   {
     id: "physicians",
     component: "N° physicians associated to the account",
-    maxPoints: 10,
+    weight: 8,
     ranged: false,
     scoringCriteria: "Increases score based on number of associated physicians",
     note: "",
@@ -58,7 +58,7 @@ const DEFAULT_ICP_COMPONENTS = [
   {
     id: "potential",
     component: "Potential Score",
-    maxPoints: 30,
+    weight: 25,
     ranged: false,
     scoringCriteria: "Estimated procedure volume for product category, budget / purchasing power, competitive products currently in use",
     note: "",
@@ -241,8 +241,33 @@ function ICPScoreTab() {
   const [editingId, setEditingId] = useState(null);
   const [dirty, setDirty] = useState(false);
 
-  const update = (id, key, value) => {
+  // Non-ranged components participate in the 100% weight pool
+  const nonRanged = components.filter((c) => !c.ranged);
+  const total = nonRanged.reduce((s, c) => s + (c.weight || 0), 0);
+
+  // Tiering update (tier1/tier2/tier3 — not part of weight pool)
+  const updateTiering = (id, key, value) => {
     setComponents((prev) => prev.map((c) => (c.id === id ? { ...c, [key]: value } : c)));
+    setDirty(true);
+  };
+
+  // Weight change: auto-redistribute among other non-ranged components
+  const changeWeight = (id, newWeight) => {
+    setComponents((prev) => {
+      const pool = prev.filter((c) => !c.ranged);
+      const redistributed = redistributeWeights(pool, id, newWeight);
+      return prev.map((c) => {
+        if (c.ranged) return c;
+        const updated = redistributed.find((r) => r.id === c.id);
+        return updated || c;
+      });
+    });
+    setDirty(true);
+  };
+
+  // Scoring criteria update
+  const updateCriteria = (id, value) => {
+    setComponents((prev) => prev.map((c) => (c.id === id ? { ...c, scoringCriteria: value } : c)));
     setDirty(true);
   };
 
@@ -251,7 +276,7 @@ function ICPScoreTab() {
       {/* Info banner */}
       <div className="rounded-xl border border-[#fde68a] bg-[#fffbeb] px-5 py-4">
         <p className="text-sm text-[#92400e]">
-          <span className="font-semibold">ICP Score</span> measures how well an account fits your Ideal Customer Profile. The system provides default component weights — adjust max points and scoring criteria to match your business context.
+          <span className="font-semibold">ICP Score</span> measures how well an account fits your Ideal Customer Profile. Component weights must sum to 100% — adjusting one value automatically redistributes the rest.
         </p>
       </div>
 
@@ -261,7 +286,7 @@ function ICPScoreTab() {
           <thead>
             <tr className="border-b border-[#e5e7eb] bg-[#f9fafb]">
               <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[#6a7282] w-[240px]">Component</th>
-              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[#6a7282] w-[200px]">Max Points</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[#6a7282] w-[220px]">Weight</th>
               <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.5px] text-[#6a7282]">Scoring Criteria</th>
               <th className="px-6 py-3 w-[52px]" />
             </tr>
@@ -280,29 +305,30 @@ function ICPScoreTab() {
                     </div>
                   </td>
 
-                  {/* Max points — tiering gets three separate inputs */}
+                  {/* Weight column */}
                   <td className="px-6 py-4">
                     {comp.ranged ? (
+                      /* Tiering: show three threshold inputs when editing */
                       isEditing ? (
                         <div className="flex items-center gap-1.5">
                           <input
                             type="number" min={0}
                             value={comp.tier1}
-                            onChange={(e) => update(comp.id, "tier1", parseInt(e.target.value) || 0)}
+                            onChange={(e) => updateTiering(comp.id, "tier1", parseInt(e.target.value) || 0)}
                             className="w-14 rounded-lg border border-[#155dfc] px-2 py-1 text-center text-sm text-[#111318] focus:outline-none focus:ring-1 focus:ring-[#155dfc]"
                           />
                           <span className="text-[#9ca3af]">–</span>
                           <input
                             type="number" min={0}
                             value={comp.tier2}
-                            onChange={(e) => update(comp.id, "tier2", parseInt(e.target.value) || 0)}
+                            onChange={(e) => updateTiering(comp.id, "tier2", parseInt(e.target.value) || 0)}
                             className="w-14 rounded-lg border border-[#155dfc] px-2 py-1 text-center text-sm text-[#111318] focus:outline-none focus:ring-1 focus:ring-[#155dfc]"
                           />
                           <span className="text-[#9ca3af]">–</span>
                           <input
                             type="number" min={0}
                             value={comp.tier3}
-                            onChange={(e) => update(comp.id, "tier3", parseInt(e.target.value) || 0)}
+                            onChange={(e) => updateTiering(comp.id, "tier3", parseInt(e.target.value) || 0)}
                             className="w-14 rounded-lg border border-[#155dfc] px-2 py-1 text-center text-sm text-[#111318] focus:outline-none focus:ring-1 focus:ring-[#155dfc]"
                           />
                           <span className="text-xs text-[#9ca3af]">pts</span>
@@ -312,15 +338,30 @@ function ICPScoreTab() {
                           {comp.tier1} – {comp.tier2} – {comp.tier3} pts
                         </span>
                       )
-                    ) : isEditing ? (
-                      <input
-                        type="number"
-                        value={comp.maxPoints}
-                        onChange={(e) => update(comp.id, "maxPoints", parseInt(e.target.value) || 0)}
-                        className="w-20 rounded-lg border border-[#155dfc] px-2 py-1 text-sm text-[#111318] focus:outline-none focus:ring-1 focus:ring-[#155dfc]"
-                      />
                     ) : (
-                      <span className="text-sm font-medium text-[#374151]">{comp.maxPoints} pts</span>
+                      /* Non-ranged: weight % input + bar */
+                      <div className="flex items-center gap-2">
+                        {isEditing ? (
+                          <input
+                            type="number"
+                            min={0}
+                            max={100}
+                            value={comp.weight}
+                            onChange={(e) => changeWeight(comp.id, parseInt(e.target.value) || 0)}
+                            className="w-16 rounded-lg border border-[#155dfc] px-2 py-1 text-center text-sm font-semibold text-[#111318] focus:outline-none focus:ring-1 focus:ring-[#155dfc]"
+                          />
+                        ) : (
+                          <span className="w-16 text-center text-sm font-semibold text-[#111318]">
+                            {comp.weight}%
+                          </span>
+                        )}
+                        <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#e5e7eb]">
+                          <div
+                            className="h-full rounded-full bg-[#155dfc] transition-all"
+                            style={{ width: `${comp.weight}%` }}
+                          />
+                        </div>
+                      </div>
                     )}
                   </td>
 
@@ -329,7 +370,7 @@ function ICPScoreTab() {
                     {isEditing ? (
                       <textarea
                         value={comp.scoringCriteria}
-                        onChange={(e) => update(comp.id, "scoringCriteria", e.target.value)}
+                        onChange={(e) => updateCriteria(comp.id, e.target.value)}
                         rows={3}
                         className="w-full resize-none rounded-lg border border-[#155dfc] px-3 py-2 text-sm text-[#374151] focus:outline-none focus:ring-1 focus:ring-[#155dfc]"
                       />
@@ -360,9 +401,9 @@ function ICPScoreTab() {
 
         {/* Footer total */}
         <div className="flex items-center justify-between border-t border-[#e5e7eb] bg-[#f9fafb] px-6 py-3">
-          <span className="text-xs text-[#9ca3af]">Total max score (excluding tiering)</span>
-          <span className="text-sm font-bold text-[#111318]">
-            {components.filter((c) => !c.ranged).reduce((s, c) => s + (parseInt(c.maxPoints) || 0), 0)} pts
+          <span className="text-xs text-[#9ca3af]">Total weight (excluding tiering)</span>
+          <span className={`text-sm font-bold ${total === 100 ? "text-[#16a34a]" : "text-[#f59e0b]"}`}>
+            {total}%
           </span>
         </div>
       </div>
