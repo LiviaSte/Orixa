@@ -167,7 +167,7 @@ export default function LeadingBoard() {
             </div>
             <button
               onClick={() => navigate("/leading-board/score-configuration")}
-              className="rounded-[10px] bg-[#101828] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1d2939]"
+              className="rounded-[10px] bg-[#155dfc] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1a4fd8]"
             >
               Score configuration
             </button>

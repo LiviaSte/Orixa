@@ -367,24 +367,20 @@ function ICPScoreTab() {
         </div>
       </div>
 
-      {/* Save / reset — only shown when dirty */}
-      {dirty && (
+      {/* Save / Cancel — only shown while actively editing a row */}
+      {editingId !== null && (
         <div className="flex justify-end gap-3">
           <button
-            onClick={() => { setComponents(DEFAULT_ICP_COMPONENTS); setDirty(false); setEditingId(null); }}
-            className="flex items-center gap-1.5 rounded-lg border border-[#e5e7eb] bg-white px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#f9fafb] transition-colors"
+            onClick={() => { setEditingId(null); setComponents(DEFAULT_ICP_COMPONENTS); setDirty(false); }}
+            className="rounded-lg border border-[#e5e7eb] bg-white px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#f9fafb] transition-colors"
           >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-[#9ca3af]">
-              <path d="M1 3v4h4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M1.5 7A6 6 0 1 0 3 3.3L1 7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Reset to defaults
+            Cancel
           </button>
           <button
             onClick={() => { setDirty(false); setEditingId(null); }}
             className="rounded-lg bg-[#155dfc] px-4 py-2 text-sm font-medium text-white hover:bg-[#1a4fd8] transition-colors"
           >
-            Save configuration
+            Save
           </button>
         </div>
       )}
@@ -400,6 +396,7 @@ function EngagementScoreTab() {
   const [channels, setChannels] = useState(() =>
     DEFAULT_CHANNELS.map((ch) => ({ ...ch, kpis: ch.kpis.map((k) => ({ ...k })) }))
   );
+  const [searchQuery, setSearchQuery] = useState("");
 
   // ── Weight change with auto-redistribution ────────────────────────────────
   const changeWeight = (chId, kpiId, newWeight) => {
@@ -472,28 +469,62 @@ function EngagementScoreTab() {
     setChannels(DEFAULT_CHANNELS.map((ch) => ({ ...ch, kpis: ch.kpis.map((k) => ({ ...k })) })));
   };
 
+  // Filter channels/KPIs by search query
+  const visibleChannels = searchQuery.trim()
+    ? channels
+        .map((ch) => ({
+          ...ch,
+          kpis: ch.kpis.filter((k) =>
+            k.name.toLowerCase().includes(searchQuery.toLowerCase())
+          ),
+        }))
+        .filter((ch) => ch.kpis.length > 0)
+    : channels;
+
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <p className="text-sm text-[#6a7282]">
           Edit KPI classifications and weights per channel. Weights within each channel are automatically adjusted to sum to 100%.
         </p>
-        <button
-          onClick={handleReset}
-          className="flex items-center gap-1.5 rounded-lg border border-[#e5e7eb] bg-white px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#f9fafb] transition-colors"
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-[#9ca3af]">
-            <path d="M1 3v4h4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M1.5 7A6 6 0 1 0 3 3.3L1 7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Reset to defaults
-        </button>
+        <div className="flex items-center gap-3 shrink-0">
+          {/* Search */}
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af]">
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                <path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16ZM19 19l-4.35-4.35" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </span>
+            <input
+              type="text"
+              placeholder="Search KPIs…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-[200px] rounded-lg border border-[#e5e7eb] bg-white py-2 pl-9 pr-4 text-sm text-[#0a0a0a] placeholder:text-[#9ca3af] focus:border-[#155dfc] focus:outline-none focus:ring-1 focus:ring-[#155dfc]"
+            />
+          </div>
+          <button
+            onClick={handleReset}
+            className="flex items-center gap-1.5 rounded-lg border border-[#e5e7eb] bg-white px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#f9fafb] transition-colors"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-[#9ca3af]">
+              <path d="M1 3v4h4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M1.5 7A6 6 0 1 0 3 3.3L1 7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Reset to defaults
+          </button>
+        </div>
       </div>
 
       {/* Channel cards */}
       <div className="flex flex-col gap-4">
-        {channels.map((ch) => {
+        {visibleChannels.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 gap-2 rounded-xl border border-[#e5e7eb] bg-white">
+            <p className="text-sm font-medium text-[#374151]">No KPIs found</p>
+            <p className="text-xs text-[#9ca3af]">Try a different search term.</p>
+          </div>
+        ) : visibleChannels.map((ch) => {
           const total = ch.kpis.reduce((s, k) => s + k.weight, 0);
           return (
             <div

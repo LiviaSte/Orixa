@@ -4,6 +4,9 @@ import Sidebar from "../components/Sidebar";
 import { CHANNEL_KPIS } from "../constants/channelKPIs";
 import { SearchIcon20, EditPencilIcon, TrashIcon } from "../components/icons";
 
+// ─── Shared select style ──────────────────────────────────────────────────────
+const SELECT_CLS = "rounded-lg border border-[#e5e7eb] bg-white px-3 py-2 text-sm text-[#374151] focus:border-[#155dfc] focus:outline-none focus:ring-1 focus:ring-[#155dfc] appearance-none pr-8";
+
 // ─── Sample "last changed" dates spread across the last 6 months ──────────────
 const SAMPLE_DATES = [
   "Jan 14, 2026", "Jan 22, 2026", "Feb 3, 2026",  "Feb 10, 2026",
@@ -49,17 +52,6 @@ const CHANNEL_TABS = [
   { label: "F2F",          key: "F2F" },
 ];
 
-// ─── Channel icons / emoji ────────────────────────────────────────────────────
-const CHANNEL_ICON = {
-  Email:    "✉️",
-  Call:     "📞",
-  Webinar:  "🎥",
-  Events:   "📅",
-  Web:      "🌐",
-  Congress: "🏛️",
-  F2F:      "🤝",
-};
-
 // ─── Type badge colours ───────────────────────────────────────────────────────
 function TypeBadge({ type }) {
   const cfg = {
@@ -73,26 +65,6 @@ function TypeBadge({ type }) {
     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${cfg.bg} ${cfg.text}`}>
       {cfg.label}
     </span>
-  );
-}
-
-// ─── Tiny icon: eye ──────────────────────────────────────────────────────────
-function EyeIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M1 10s3.5-7 9-7 9 7 9 7-3.5 7-9 7-9-7-9-7z"/>
-      <circle cx="10" cy="10" r="3"/>
-    </svg>
-  );
-}
-
-// ─── Tiny icon: history ───────────────────────────────────────────────────────
-function HistoryIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="1 4 1 10 7 10"/>
-      <path d="M3.51 15a9 9 0 1 0 .49-5.5"/>
-    </svg>
   );
 }
 
@@ -198,7 +170,7 @@ export default function MetricLibrary() {
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="rounded-lg border border-[#e5e7eb] bg-white px-3 py-2 text-sm text-[#374151] focus:border-[#155dfc] focus:outline-none focus:ring-1 focus:ring-[#155dfc]"
+              className={SELECT_CLS}
             >
               {availableTypes.map((t) => (
                 <option key={t} value={t}>
@@ -257,16 +229,11 @@ export default function MetricLibrary() {
                         idx === filteredMetrics.length - 1 ? "border-b-0" : ""
                       }`}
                     >
-                      {/* Metric name + channel icon */}
+                      {/* Metric name */}
                       <td className="px-5 py-4">
-                        <div className="flex items-start gap-2.5">
-                          <span className="mt-0.5 text-base leading-none">
-                            {CHANNEL_ICON[metric.channel] ?? "📊"}
-                          </span>
-                          <span className="text-sm font-medium text-[#111318] leading-snug">
-                            {metric.name}
-                          </span>
-                        </div>
+                        <span className="text-sm font-medium text-[#111318] leading-snug">
+                          {metric.name}
+                        </span>
                       </td>
 
                       {/* Calculation — monospace pill */}
@@ -311,23 +278,11 @@ export default function MetricLibrary() {
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-1.5">
                           <button
-                            title="Preview"
-                            className="rounded p-1.5 text-[#9ca3af] transition-colors hover:bg-[#f3f4f6] hover:text-[#374151]"
-                          >
-                            <EyeIcon />
-                          </button>
-                          <button
                             onClick={handleEdit}
                             title="Edit in Adoption Ladder"
                             className="rounded p-1.5 text-[#9ca3af] transition-colors hover:bg-[#f3f4f6] hover:text-[#155dfc]"
                           >
                             <EditPencilIcon />
-                          </button>
-                          <button
-                            title="History"
-                            className="rounded p-1.5 text-[#9ca3af] transition-colors hover:bg-[#f3f4f6] hover:text-[#374151]"
-                          >
-                            <HistoryIcon />
                           </button>
                           <button
                             onClick={() => setDeleteConfirm(metric)}
