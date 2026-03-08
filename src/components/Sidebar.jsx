@@ -8,16 +8,18 @@ import {
   LeadingBoardIcon,
   LadderIcon,
   ThemeToggleIcon,
+  CampaignsIcon,
 } from "./icons";
 
 const navItems = [
   { label: "Data sources", icon: DataSourcesIcon, path: "/" },
   { label: "Domain Definition", icon: DictionaryIcon, path: "/domain-definition" },
   { label: "Funnel", icon: LadderIcon, path: "/adoption-ladder" },
-  { label: "Metric Library", icon: GoalTrackingIcon, path: "/metric-library" },
+  { label: "Campaigns", icon: CampaignsIcon, path: "/campaigns" },
   { label: "Profiles", icon: ProfilesIcon, path: "/profiles" },
   { label: "Projects", icon: ProjectsIcon, path: "/projects" },
   { label: "Leading board", icon: LeadingBoardIcon, path: "/leading-board" },
+  { label: "Metric Library", icon: GoalTrackingIcon, path: "/metric-library" },
 ];
 
 export default function Sidebar() {

@@ -13,6 +13,8 @@ import DomainDefinition from "./pages/DomainDefinition";
 import AdoptionLadderConfig from "./pages/AdoptionLadderConfig";
 import LeadingBoard from "./pages/LeadingBoard";
 import ScoreConfiguration from "./pages/ScoreConfiguration";
+import Campaigns from "./pages/Campaigns";
+import ProjectDetail from "./pages/ProjectDetail";
 
 export default function App() {
   return (
@@ -31,6 +33,8 @@ export default function App() {
         <Route path="/profiles/hospital/:id" element={<HospitalDetail />} />
         <Route path="/leading-board" element={<LeadingBoard />} />
         <Route path="/leading-board/score-configuration" element={<ScoreConfiguration />} />
+        <Route path="/campaigns" element={<Campaigns />} />
+        <Route path="/projects/:id" element={<ProjectDetail />} />
       </Routes>
     </BrowserRouter>
   );
