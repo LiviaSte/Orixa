@@ -158,7 +158,7 @@ export default function LeadingBoard() {
           <div className="flex items-start justify-between">
             <div className="flex flex-col gap-1">
               <h1 className="text-2xl font-medium leading-9 text-[#0a0a0a]">
-                Leading board
+                Lead board
               </h1>
               <p className="max-w-[700px] text-base leading-6 text-[#4a5565]">
                 Monitor lead progression, funnel performance, and institutional

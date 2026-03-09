@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import { useDomainDefinitionContext } from "../DomainDefinitionContext";
 import {
   PlusIcon,
   SearchIcon,
@@ -14,15 +15,6 @@ import {
   ChevronDownIcon,
   TrashIcon,
 } from "../components/icons";
-
-// ── Funnel stages ─────────────────────────────────────────────────
-const FUNNEL_STAGES = [
-  { id: "lead",        label: "Lead" },
-  { id: "mql",         label: "MQL" },
-  { id: "sql",         label: "SQL" },
-  { id: "opportunity", label: "Opportunity" },
-  { id: "conversion",  label: "Conversion" },
-];
 
 const REGIONS = [
   "Global", "EMEA", "North America", "APAC", "LATAM",
@@ -233,8 +225,8 @@ function Step1({ name, setName, description, setDescription, product, setProduct
 }
 
 // ── Step 2: Goal ──────────────────────────────────────────────────
-function Step2({ fromStage, toStage, onStageClick, targetConversion, setTargetConversion }) {
-  const stageIdx = (id) => FUNNEL_STAGES.findIndex((s) => s.id === id);
+function Step2({ fromStage, toStage, onStageClick, targetConversion, setTargetConversion, funnelStages }) {
+  const stageIdx = (id) => funnelStages.findIndex((s) => s.id === id);
 
   const isInRange = (id) => {
     if (!fromStage) return false;
@@ -264,7 +256,7 @@ function Step2({ fromStage, toStage, onStageClick, targetConversion, setTargetCo
       {/* Funnel pipeline */}
       <div className="rounded-2xl border border-gray-100 bg-white px-8 py-8 shadow-sm">
         <div className="flex items-center">
-          {FUNNEL_STAGES.map((stage, i) => {
+          {funnelStages.map((stage, i) => {
             const inRange  = isInRange(stage.id);
             const isFrom   = stage.id === fromStage;
             const isTo     = stage.id === toStage;
@@ -283,7 +275,7 @@ function Step2({ fromStage, toStage, onStageClick, targetConversion, setTargetCo
                     {i + 1}
                   </div>
                   <span className={`text-xs font-semibold ${inRange ? "text-[#155dfc]" : "text-[#6a7282]"}`}>
-                    {stage.label}
+                    {stage.name}
                   </span>
                   <span className={`text-[10px] font-bold uppercase tracking-wide ${
                     isFrom ? "text-[#155dfc]" : isTo ? "text-[#155dfc]" : "invisible"
@@ -291,7 +283,7 @@ function Step2({ fromStage, toStage, onStageClick, targetConversion, setTargetCo
                     {isFrom ? "from" : isTo ? "to" : "·"}
                   </span>
                 </button>
-                {i < FUNNEL_STAGES.length - 1 && (
+                {i < funnelStages.length - 1 && (
                   <div className={`h-0.5 w-6 shrink-0 transition-colors ${
                     isConnectorActive(i) ? "bg-[#155dfc]" : "bg-gray-200"
                   }`} />
@@ -313,9 +305,9 @@ function Step2({ fromStage, toStage, onStageClick, targetConversion, setTargetCo
           </div>
           <p className="text-sm text-[#155dfc]">
             Track conversion from{" "}
-            <span className="font-semibold">{FUNNEL_STAGES.find((s) => s.id === fromStage)?.label}</span>
+            <span className="font-semibold">{funnelStages.find((s) => s.id === fromStage)?.name}</span>
             {" → "}
-            <span className="font-semibold">{FUNNEL_STAGES.find((s) => s.id === toStage)?.label}</span>
+            <span className="font-semibold">{funnelStages.find((s) => s.id === toStage)?.name}</span>
           </p>
           <button
             onClick={() => onStageClick("__clear__")}
@@ -338,9 +330,9 @@ function Step2({ fromStage, toStage, onStageClick, targetConversion, setTargetCo
           </label>
           <p className="mb-2 text-xs text-[#9ca3af]">
             Set the expected conversion rate from{" "}
-            <span className="font-medium text-[#6a7282]">{FUNNEL_STAGES.find((s) => s.id === fromStage)?.label}</span>
+            <span className="font-medium text-[#6a7282]">{funnelStages.find((s) => s.id === fromStage)?.name}</span>
             {" → "}
-            <span className="font-medium text-[#6a7282]">{FUNNEL_STAGES.find((s) => s.id === toStage)?.label}</span>.
+            <span className="font-medium text-[#6a7282]">{funnelStages.find((s) => s.id === toStage)?.name}</span>.
             This will be used as the benchmark on the project dashboard.
           </p>
           <div className="relative w-40">
@@ -538,6 +530,9 @@ function Step3({
 
 // ── Project Creator (full stepper page) ───────────────────────────
 function ProjectCreator({ onCancel, onCreate }) {
+  const { adoptionLadder } = useDomainDefinitionContext();
+  const funnelStages = adoptionLadder.stages;
+
   const [step, setStep] = useState(1);
 
   // Step 1
@@ -558,7 +553,7 @@ function ProjectCreator({ onCancel, onCreate }) {
 
   const handleStageClick = (id) => {
     if (id === "__clear__") { setFromStage(null); setToStage(null); return; }
-    const idx = (sid) => FUNNEL_STAGES.findIndex((s) => s.id === sid);
+    const idx = (sid) => funnelStages.findIndex((s) => s.id === sid);
     if (!fromStage) {
       setFromStage(id);
     } else if (!toStage) {
@@ -652,6 +647,7 @@ function ProjectCreator({ onCancel, onCreate }) {
                 onStageClick={handleStageClick}
                 targetConversion={targetConversion}
                 setTargetConversion={setTargetConversion}
+                funnelStages={funnelStages}
               />
             )}
             {step === 3 && (
@@ -692,6 +688,8 @@ function ProjectCreator({ onCancel, onCreate }) {
 // ── Main Projects page ────────────────────────────────────────────
 export default function Projects() {
   const navigate = useNavigate();
+  const { adoptionLadder } = useDomainDefinitionContext();
+  const funnelStages = adoptionLadder.stages;
   const [searchQuery,  setSearchQuery]  = useState("");
   const [showCreator,  setShowCreator]  = useState(false);
   const [projects,     setProjects]     = useState(INITIAL_PROJECTS);
@@ -704,7 +702,7 @@ export default function Projects() {
     ].filter(Boolean).slice(0, 4);
 
     const goalLabel = data.goal
-      ? `${FUNNEL_STAGES.find((s) => s.id === data.goal.fromStage)?.label} → ${FUNNEL_STAGES.find((s) => s.id === data.goal.toStage)?.label}`
+      ? `${funnelStages.find((s) => s.id === data.goal.fromStage)?.name} → ${funnelStages.find((s) => s.id === data.goal.toStage)?.name}`
       : "";
 
     setProjects((prev) => [

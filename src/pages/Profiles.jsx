@@ -16,10 +16,10 @@ const tabs = [
   { label: "Hospitals", count: 124 },
 ];
 
-function getPriority(leadScore) {
-  if (leadScore >= 80) return "High";
-  if (leadScore >= 50) return "Medium";
-  return "Low";
+function getPriority(score) {
+  if (score >= 80) return "Hot";
+  if (score >= 50) return "Warm";
+  return "Cold";
 }
 
 const hcpRows = [
@@ -86,9 +86,9 @@ const hcpRows = [
 ];
 
 const priorityStyles = {
-  High: "bg-[#dcfce7] text-[#15803d]",
-  Medium: "bg-[#ffedd5] text-[#c2410c]",
-  Low: "bg-[#fef9c3] text-[#a16207]",
+  Hot:  "bg-[#ffe4e6] text-[#be123c]",
+  Warm: "bg-[#fef9c3] text-[#a16207]",
+  Cold: "bg-[#cffafe] text-[#0e7490]",
 };
 
 // Each hospital lists which HCP ids are affiliated, so we can compute an aggregated score
@@ -101,6 +101,7 @@ const hospitalRows = [
     potential: "6,267,928.00",
     city: "Rochester",
     management: "Privato",
+    sap: "10045821",
     hcpIds: [1, 6],
   },
   {
@@ -111,6 +112,7 @@ const hospitalRows = [
     potential: "5,276,276.00",
     city: "Cleveland",
     management: "Public",
+    sap: "10038274",
     hcpIds: [2, 3],
   },
   {
@@ -121,6 +123,7 @@ const hospitalRows = [
     potential: "4,286,186.00",
     city: "Baltimore",
     management: "Public",
+    sap: "10061938",
     hcpIds: [4, 5],
   },
   {
@@ -131,6 +134,7 @@ const hospitalRows = [
     potential: "5,176,298.00",
     city: "Boston",
     management: "Privato",
+    sap: "10072846",
     hcpIds: [2],
   },
   {
@@ -141,6 +145,7 @@ const hospitalRows = [
     potential: "3,367,286.00",
     city: "Berlin",
     management: "Public",
+    sap: "10053917",
     hcpIds: [3, 4],
   },
   {
@@ -151,6 +156,7 @@ const hospitalRows = [
     potential: "1,273,201.00",
     city: "London",
     management: "Public",
+    sap: "10029463",
     hcpIds: [1],
   },
   {
@@ -161,18 +167,23 @@ const hospitalRows = [
     potential: "2,227,028.00",
     city: "Barcelona",
     management: "Privato",
+    sap: "10084752",
     hcpIds: [5, 6],
   },
 ];
 
-// Compute hospital score = average lead score of affiliated HCPs
+// Compute aggregated hospital scores from affiliated HCPs
+function getHospitalScores(hcpIds) {
+  if (!hcpIds || hcpIds.length === 0) return { engagement: 0, icp: 0, account: 0 };
+  const hcps = hcpIds.map((id) => hcpRows.find((h) => h.id === id)).filter(Boolean);
+  const avgEngagement = Math.round(hcps.reduce((s, h) => s + h.engagementScore, 0) / hcps.length);
+  const avgIcp        = Math.round(hcps.reduce((s, h) => s + h.icpGrading, 0) / hcps.length);
+  const account       = avgEngagement + avgIcp;
+  return { engagement: avgEngagement, icp: avgIcp, account };
+}
+
 function getHospitalScore(hcpIds) {
-  if (!hcpIds || hcpIds.length === 0) return 0;
-  const total = hcpIds.reduce((sum, id) => {
-    const hcp = hcpRows.find((h) => h.id === id);
-    return sum + (hcp ? hcp.leadScore : 0);
-  }, 0);
-  return Math.round(total / hcpIds.length);
+  return getHospitalScores(hcpIds).account;
 }
 
 
@@ -184,18 +195,18 @@ export default function Profiles() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [scoreModal, setScoreModal] = useState(null);
+  const [hospitalScoreModal, setHospitalScoreModal] = useState(null);
   const [priorityFilter, setPriorityFilter] = useState("All");
   const [priorityDropdownOpen, setPriorityDropdownOpen] = useState(false);
 
   // Filter HCP rows by search query and priority
   const filteredRows = hcpRows.filter((row) => {
-    // Search filter — match name, SAP, or affiliation
+    // Search filter — match name or affiliation
     const query = searchQuery.toLowerCase().trim();
     if (query) {
       const matchesName = row.name.toLowerCase().includes(query);
-      const matchesSap = row.sap.toLowerCase().includes(query);
       const matchesAffiliation = row.affiliation.toLowerCase().includes(query);
-      if (!matchesName && !matchesSap && !matchesAffiliation) return false;
+      if (!matchesName && !matchesAffiliation) return false;
     }
 
     // Priority filter
@@ -285,7 +296,7 @@ export default function Profiles() {
                   </span>
                   <input
                     type="text"
-                    placeholder="Search profiles by name, SAP, or affiliation"
+                    placeholder="Search profiles by name or affiliation"
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value);
@@ -321,7 +332,7 @@ export default function Profiles() {
                   </button>
                   {priorityDropdownOpen && (
                     <div className="absolute left-0 top-full z-10 mt-1 w-full overflow-hidden rounded-[10px] border border-[#d1d5dc] bg-white shadow-lg">
-                      {["All", "High", "Medium", "Low"].map((option) => (
+                      {["All", "Hot", "Warm", "Cold"].map((option) => (
                         <button
                           key={option}
                           onClick={() => {
@@ -360,9 +371,6 @@ export default function Profiles() {
                       <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.6px] text-[#6a7282]">
                         Affiliation
                       </th>
-                      <th className="w-[149px] px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.6px] text-[#6a7282]">
-                        SAP
-                      </th>
                       <th className="w-[173px] px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.6px] text-[#6a7282]">
                         Lead Score
                       </th>
@@ -400,11 +408,6 @@ export default function Profiles() {
                             </span>
                           </td>
                           <td className="px-6 py-5">
-                            <span className="text-sm text-[#4a5565]">
-                              {row.sap}
-                            </span>
-                          </td>
-                          <td className="px-6 py-5">
                             <button
                               onClick={() => setScoreModal(row)}
                               className="text-sm font-medium text-[#5598f6] underline opacity-90 transition-colors hover:text-[#155dfc]"
@@ -425,7 +428,7 @@ export default function Profiles() {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={7} className="px-6 py-12 text-center">
+                        <td colSpan={6} className="px-6 py-12 text-center">
                           <p className="text-sm text-[#6a7282]">
                             No profiles match your search.
                           </p>
@@ -558,7 +561,13 @@ export default function Profiles() {
                         Management
                       </th>
                       <th className="w-[120px] px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.6px] text-[#6a7282]">
+                        SAP
+                      </th>
+                      <th className="w-[120px] px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.6px] text-[#6a7282]">
                         Score
+                      </th>
+                      <th className="w-[120px] px-6 py-4 text-center text-xs font-semibold uppercase tracking-[0.6px] text-[#6a7282]">
+                        Priority
                       </th>
                     </tr>
                   </thead>
@@ -606,15 +615,30 @@ export default function Profiles() {
                             </span>
                           </td>
                           <td className="px-6 py-5">
-                            <span className="text-sm font-medium text-[#5598f6] underline opacity-90">
-                              {getHospitalScore(row.hcpIds)}
+                            <span className="text-sm text-[#4a5565]">
+                              {row.sap}
                             </span>
+                          </td>
+                          <td className="px-6 py-5">
+                            <button
+                              onClick={() => setHospitalScoreModal(row)}
+                              className="text-sm font-medium text-[#5598f6] underline opacity-90 transition-colors hover:text-[#155dfc]"
+                            >
+                              {getHospitalScore(row.hcpIds)}
+                            </button>
+                          </td>
+                          <td className="px-6 py-[17px]">
+                            <div className="flex justify-center">
+                              <span className={`rounded px-2.5 py-1 text-xs font-medium ${priorityStyles[getPriority(getHospitalScore(row.hcpIds))]}`}>
+                                {getPriority(getHospitalScore(row.hcpIds))}
+                              </span>
+                            </div>
                           </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={8} className="px-6 py-12 text-center">
+                        <td colSpan={10} className="px-6 py-12 text-center">
                           <p className="text-sm text-[#6a7282]">
                             No hospitals match your search.
                           </p>
@@ -700,11 +724,19 @@ export default function Profiles() {
             </div>
 
             <div className="flex flex-col gap-4 px-6">
-              <div className="flex flex-col gap-1">
-                <p className="text-base font-medium text-[#0a0a0a]">
-                  HCP name
-                </p>
-                <p className="text-sm text-[#4a5565]">{scoreModal.name}</p>
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-1">
+                  <p className="text-base font-medium text-[#0a0a0a]">
+                    HCP name
+                  </p>
+                  <p className="text-sm text-[#4a5565]">{scoreModal.name}</p>
+                </div>
+                <button
+                  onClick={() => { setScoreModal(null); navigate("/leading-board/score-configuration"); }}
+                  className="text-xs font-medium text-[#155dfc] hover:underline"
+                >
+                  Score configuration →
+                </button>
               </div>
 
               <div className="flex gap-4">
@@ -751,6 +783,90 @@ export default function Profiles() {
           </div>
         </div>
       )}
+
+      {/* Hospital Score Modal */}
+      {hospitalScoreModal && (() => {
+        const { engagement, icp, account } = getHospitalScores(hospitalScoreModal.hcpIds);
+        return (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+            onClick={() => setHospitalScoreModal(null)}
+          >
+            <div
+              className="w-[680px] overflow-hidden rounded-[24px] border border-[rgba(154,168,188,0.2)] bg-white shadow-[0px_16px_32px_0px_rgba(0,0,0,0.16)]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between p-6">
+                <h2 className="text-[22px] font-semibold leading-[30px] text-[#1a212b]">
+                  Account score
+                </h2>
+                <button
+                  onClick={() => setHospitalScoreModal(null)}
+                  className="rounded-full p-1 transition-colors hover:bg-gray-100"
+                >
+                  <CloseIcon />
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-4 px-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-1">
+                    <p className="text-base font-medium text-[#0a0a0a]">Hospital name</p>
+                    <p className="text-sm text-[#4a5565]">{hospitalScoreModal.name}</p>
+                  </div>
+                  <button
+                    onClick={() => { setHospitalScoreModal(null); navigate("/leading-board/score-configuration"); }}
+                    className="text-xs font-medium text-[#155dfc] hover:underline"
+                  >
+                    Score configuration →
+                  </button>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="flex flex-1 flex-col gap-2 rounded-[14px] border border-gray-200 bg-white px-[21px] pb-4 pt-[21px]">
+                    <p className="text-sm text-[#4a5565]">Engagement score</p>
+                    <p className="text-[30px] font-bold leading-9 tracking-[0.4px] text-[#0a0a0a]">
+                      {engagement}
+                    </p>
+                    <p className="text-xs font-light leading-4 text-[#525e6f]">
+                      Average engagement score of affiliated HCPs
+                    </p>
+                  </div>
+
+                  <div className="flex flex-1 flex-col gap-2 rounded-[14px] border border-gray-200 bg-white px-[21px] pb-4 pt-[21px]">
+                    <p className="text-sm text-[#4a5565]">ICP grading</p>
+                    <p className="text-[30px] font-bold leading-9 tracking-[0.4px] text-[#0a0a0a]">
+                      {icp}
+                    </p>
+                    <p className="text-xs font-light leading-4 text-[#525e6f]">
+                      Average ICP grading of affiliated HCPs
+                    </p>
+                  </div>
+
+                  <div className="flex flex-1 flex-col gap-2 rounded-[14px] border border-gray-200 bg-[#e0edff] px-[22px] pb-4 pt-[22px]">
+                    <p className="text-sm text-[#4a5565]">Account score</p>
+                    <p className="text-[30px] font-bold leading-9 tracking-[0.4px] text-[#0a0a0a]">
+                      {account}
+                    </p>
+                    <p className="text-xs font-light leading-4 text-[#525e6f]">
+                      Engagement score + ICP grading
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end p-6">
+                <button
+                  onClick={() => setHospitalScoreModal(null)}
+                  className="rounded-2xl bg-[#5c17e5] px-4 py-3 text-base font-medium text-white transition-colors hover:bg-[#4c12c0]"
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Close priority dropdown when clicking outside */}
       {priorityDropdownOpen && (

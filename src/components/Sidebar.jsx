@@ -18,7 +18,7 @@ const navItems = [
   { label: "Campaigns", icon: CampaignsIcon, path: "/campaigns" },
   { label: "Profiles", icon: ProfilesIcon, path: "/profiles" },
   { label: "Projects", icon: ProjectsIcon, path: "/projects" },
-  { label: "Leading board", icon: LeadingBoardIcon, path: "/leading-board" },
+  { label: "Lead board", icon: LeadingBoardIcon, path: "/leading-board" },
   { label: "Metric Library", icon: GoalTrackingIcon, path: "/metric-library" },
 ];
 

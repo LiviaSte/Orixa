@@ -275,8 +275,8 @@ function ICPScoreTab() {
   return (
     <div className="flex flex-col gap-6">
       {/* Info banner */}
-      <div className="rounded-xl border border-[#fde68a] bg-[#fffbeb] px-5 py-4">
-        <p className="text-sm text-[#92400e]">
+      <div className="rounded-xl border border-[#93c5fd] bg-[#dbeafe] px-5 py-4">
+        <p className="text-sm text-[#1d4ed8]">
           <span className="font-semibold">ICP Score</span> measures how well an account fits your Ideal Customer Profile. Component points must sum to 100 — adjusting one value automatically redistributes the rest.
         </p>
       </div>
@@ -748,7 +748,7 @@ export default function ScoreConfiguration() {
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-sm mb-5">
             <Link to="/leading-board" className="text-[#6a7282] transition-colors hover:text-[#155dfc]">
-              Leading board
+              Lead board
             </Link>
             <span className="text-[#6a7282]">/</span>
             <span className="text-[#111318] font-medium">Score configuration</span>
