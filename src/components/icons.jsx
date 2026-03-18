@@ -1,5 +1,17 @@
 // ── Sidebar nav icons ────────────────────────────────────────────
 
+export function CampaignsIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M4 10V14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M8 8V16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M12 6V18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M16 10V14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+    </svg>
+  );
+}
+
 export function GoalTrackingIcon() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
