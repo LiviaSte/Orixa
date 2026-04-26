@@ -914,6 +914,45 @@ export default function AdoptionLadderBuilder() {
               const isLast = index === sortedStages.length - 1;
               const showDivider = lastHCPIndex >= 0 && index === lastHCPIndex && !isLast;
               const nextStage = sortedStages[index + 1] || null;
+              const stageIsTerminal = isTerminalStage(stage.name);
+              const nextIsTerminal = nextStage && isTerminalStage(nextStage.name);
+              const prevIsTerminal = index > 0 && isTerminalStage(sortedStages[index - 1].name);
+
+              // Skip the second terminal stage — it's rendered alongside the first
+              if (stageIsTerminal && prevIsTerminal) return null;
+
+              // Render the two terminal stages side by side
+              if (stageIsTerminal && nextIsTerminal) {
+                return (
+                  <div key={stage.id}>
+                    <div className="flex gap-3">
+                      <div className="w-1/2">
+                        <SortableStageCard
+                          stage={stage} index={index}
+                          isFirst={index === 0} isLast={false}
+                          nextStage={nextStage} allStages={sortedStages}
+                          expandedId={expandedId}
+                          onToggleExpand={id => setExpandedId(p => p === id ? null : id)}
+                          onRename={renameStage} onRemove={removeStage}
+                          canRemove={stages.length > 2}
+                        />
+                      </div>
+                      <div className="w-1/2">
+                        <SortableStageCard
+                          stage={nextStage} index={index + 1}
+                          isFirst={false} isLast={true}
+                          nextStage={null} allStages={sortedStages}
+                          expandedId={expandedId}
+                          onToggleExpand={id => setExpandedId(p => p === id ? null : id)}
+                          onRename={renameStage} onRemove={removeStage}
+                          canRemove={stages.length > 2}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <div key={stage.id}>
                   <SortableStageCard

@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { CHANNEL_KPIS } from "../constants/channelKPIs";
 import { SearchIcon20, EditPencilIcon, TrashIcon } from "../components/icons";
@@ -68,45 +67,51 @@ function TypeBadge({ type }) {
   );
 }
 
+const CHANNEL_OPTIONS = ["Email", "Call", "Webinar", "Events", "Web", "Congress", "F2F"];
+const TYPE_OPTIONS    = ["engagement", "reach"];
+
 // ─── Main component ──────────────────────────────────────────────────────────
 export default function MetricLibrary() {
-  const navigate = useNavigate();
   const [activeTab, setActiveTab]     = useState("All Channels");
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter]   = useState("All");
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  // Local deleted-ids set (session only — no real persistence)
   const [deletedIds, setDeletedIds]   = useState(new Set());
+  // Edit modal state
+  const [editMetric, setEditMetric]   = useState(null);   // metric being edited
+  const [editForm, setEditForm]       = useState({});     // form field values
+  const [editedMetrics, setEditedMetrics] = useState({}); // id → overrides
 
   // ── Filter logic ─────────────────────────────────────────────────────────
   const filteredMetrics = useMemo(() => {
-    return ALL_METRICS.filter((m) => {
-      if (deletedIds.has(m.id)) return false;
-
-      // Channel tab
-      if (activeTab !== "All Channels" && m.channel !== activeTab) return false;
-
-      // Type filter
-      if (typeFilter !== "All" && m.type !== typeFilter) return false;
-
-      // Search
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        if (
-          !m.name.toLowerCase().includes(q) &&
-          !m.calculation.toLowerCase().includes(q) &&
-          !m.sources.some((s) => s.toLowerCase().includes(q))
-        ) {
-          return false;
+    return ALL_METRICS
+      .map((m) => ({ ...m, ...(editedMetrics[m.id] || {}) }))
+      .filter((m) => {
+        if (deletedIds.has(m.id)) return false;
+        if (activeTab !== "All Channels" && m.channel !== activeTab) return false;
+        if (typeFilter !== "All" && m.type !== typeFilter) return false;
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase();
+          if (
+            !m.name.toLowerCase().includes(q) &&
+            !m.calculation.toLowerCase().includes(q) &&
+            !m.sources.some((s) => s.toLowerCase().includes(q))
+          ) return false;
         }
-      }
-
-      return true;
-    });
-  }, [activeTab, searchQuery, typeFilter, deletedIds]);
+        return true;
+      });
+  }, [activeTab, searchQuery, typeFilter, deletedIds, editedMetrics]);
 
   // ── Handlers ─────────────────────────────────────────────────────────────
-  const handleEdit = () => navigate("/adoption-ladder");
+  const handleEdit = (metric) => {
+    setEditForm({ name: metric.name, calculation: metric.calculation, type: metric.type, channel: metric.channel });
+    setEditMetric(metric);
+  };
+
+  const handleEditSave = () => {
+    setEditedMetrics((prev) => ({ ...prev, [editMetric.id]: { ...editForm } }));
+    setEditMetric(null);
+  };
 
   const confirmDelete = (metric) => {
     setDeletedIds((prev) => new Set([...prev, metric.id]));
@@ -285,8 +290,8 @@ export default function MetricLibrary() {
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-1.5">
                           <button
-                            onClick={handleEdit}
-                            title="Edit in Adoption Ladder"
+                            onClick={() => handleEdit(metric)}
+                            title="Edit metric"
                             className="rounded p-1.5 text-[#9ca3af] transition-colors hover:bg-[#f3f4f6] hover:text-[#155dfc]"
                           >
                             <EditPencilIcon />
@@ -308,6 +313,110 @@ export default function MetricLibrary() {
           </div>
         </div>
       </main>
+
+      {/* ── Edit Metric Modal ───────────────────────────────────────────── */}
+      {editMetric && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="w-full max-w-lg rounded-xl border border-[#e5e7eb] bg-white p-6 shadow-xl">
+            <h3 className="mb-5 text-base font-semibold text-[#111318]">Edit Metric</h3>
+
+            <div className="flex flex-col gap-4">
+              {/* Name */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-medium text-[#374151]">Name</label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
+                  className="rounded-lg border border-[#e5e7eb] px-3.5 py-2 text-sm text-[#111318] focus:border-[#155dfc] focus:outline-none focus:ring-1 focus:ring-[#155dfc]"
+                />
+              </div>
+
+              {/* Calculation */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-medium text-[#374151]">Formula</label>
+                <textarea
+                  rows={3}
+                  value={editForm.calculation}
+                  onChange={(e) => setEditForm((f) => ({ ...f, calculation: e.target.value }))}
+                  className="rounded-lg border border-[#e5e7eb] px-3.5 py-2 font-mono text-xs text-[#374151] focus:border-[#155dfc] focus:outline-none focus:ring-1 focus:ring-[#155dfc] resize-none"
+                />
+              </div>
+
+              {/* Source — read-only */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-medium text-[#374151]">Source</label>
+                <div className="rounded-lg border border-[#e5e7eb] bg-[#f9fafb] px-3.5 py-2 min-h-[38px]">
+                  {editMetric.sources.map((src) => (
+                    <span key={src} className="block text-xs text-[#111318] leading-snug">{src}</span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Type */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-medium text-[#374151]">Type</label>
+                <div className="relative">
+                  <select
+                    value={editForm.type}
+                    onChange={(e) => setEditForm((f) => ({ ...f, type: e.target.value }))}
+                    className={SELECT_CLS + " w-full"}
+                  >
+                    {TYPE_OPTIONS.map((t) => (
+                      <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
+                    ))}
+                  </select>
+                  <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9ca3af]">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </span>
+                </div>
+              </div>
+
+              {/* Channel */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-medium text-[#374151]">Channel</label>
+                <div className="relative">
+                  <select
+                    value={editForm.channel}
+                    onChange={(e) => setEditForm((f) => ({ ...f, channel: e.target.value }))}
+                    className={SELECT_CLS + " w-full"}
+                  >
+                    {CHANNEL_OPTIONS.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                  <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9ca3af]">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </span>
+                </div>
+              </div>
+
+              {/* Last Changed — read-only */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-medium text-[#374151]">Last Changed</label>
+                <div className="rounded-lg border border-[#e5e7eb] bg-[#f9fafb] px-3.5 py-2 text-xs text-[#9ca3af]">
+                  {editMetric.lastChanged}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                onClick={() => setEditMetric(null)}
+                className="rounded-lg border border-[#e5e7eb] bg-white px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#f9fafb] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEditSave}
+                className="rounded-lg bg-[#155dfc] px-4 py-2 text-sm font-medium text-white hover:bg-[#1248c9] transition-colors"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Delete Confirmation Modal ────────────────────────────────────── */}
       {deleteConfirm && (

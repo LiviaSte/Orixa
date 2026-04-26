@@ -790,6 +790,14 @@ export function ExportIcon() {
   );
 }
 
+export function ProductsIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 7L12 3L4 7M20 7V17L12 21M20 7L12 11M4 7V17L12 21M4 7L12 11M12 11V21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
 export function LadderIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -798,6 +806,16 @@ export function LadderIcon() {
       <path d="M6 6H14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
       <path d="M6 10H14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
       <path d="M6 14H14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+export function CampaignsIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 9.5V14.5C3 15.0523 3.44772 15.5 4 15.5H7L13 19V5L7 8.5H4C3.44772 8.5 3 8.94772 3 9.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M17 8.5C18.5 9.5 18.5 14.5 17 15.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M7 15.5V19.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
   );
 }
