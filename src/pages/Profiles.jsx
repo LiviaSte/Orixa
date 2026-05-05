@@ -34,6 +34,98 @@ function getPriority(score) {
   return "Cold";
 }
 
+// ── Trajectory metadata (mirrors ScoreConfiguration) ─────────────
+const TRAJ_META = {
+  "↑↑": { label: "Strongly Accelerating", bgClass: "bg-[#15803d]", textClass: "text-white",     def: "Score > +50% higher than prior period" },
+  "↑":  { label: "Accelerating",          bgClass: "bg-[#86efac]", textClass: "text-[#14532d]", def: "Score +10% to +50% higher than prior period" },
+  "→":  { label: "Stable",                bgClass: "bg-[#fde68a]", textClass: "text-[#78350f]", def: "Within ±10% of prior period" },
+  "↓":  { label: "Declining",             bgClass: "bg-[#fb923c]", textClass: "text-white",     def: "Score −10% to −50% lower than prior period" },
+  "↓↓": { label: "Strongly Declining",    bgClass: "bg-[#dc2626]", textClass: "text-white",     def: "Score < −50% lower than prior period" },
+};
+
+// Derive a trajectory symbol deterministically from a numeric id (mock: no real prior-period data)
+const TRAJ_CYCLE = ["↑","→","↑↑","↓","→","↑","↓↓","→","↑↑","→","↑","↓","→","↑↑","↓","↓","↑","→","↑","↓↓"];
+function trajectoryFor(id) { return TRAJ_CYCLE[(Number(id) - 1) % TRAJ_CYCLE.length]; }
+
+// HCO uses only 3 simple arrows as per spec (↑ ↓ →)
+const HCO_TRAJ_CYCLE = ["↑","→","↓","→","↑","↓","→","↑","→","↓","↑","→","↓","↑","↑","↓","→","↓","↑","→"];
+function hcoTrajectoryFor(id) { return HCO_TRAJ_CYCLE[(Number(id) - 1) % HCO_TRAJ_CYCLE.length]; }
+
+// Generate a plausible Depth/Breadth breakdown for a given engagement score
+function getEngBreakdown(score) {
+  const depthTotal  = Math.round(score * 0.70);
+  const breadthTotal = Math.round(score * 0.30);
+
+  let events;
+  if (score >= 60) {
+    events = [
+      { name: "MSL / KAM Detailing visit (standard)", tier: "Engagement", tierBg: "bg-[#ede9fe]", tierText: "text-[#6d28d9]", weight: 3.0, count: 3, pts: Math.round(depthTotal * 0.35) },
+      { name: "Congress attended",                     tier: "Engagement", tierBg: "bg-[#ede9fe]", tierText: "text-[#6d28d9]", weight: 4.0, count: 1, pts: Math.round(depthTotal * 0.25) },
+      { name: "Webinar attended",                      tier: "Engagement", tierBg: "bg-[#ede9fe]", tierText: "text-[#6d28d9]", weight: 2.5, count: 2, pts: Math.round(depthTotal * 0.22) },
+      { name: "Email clicked",                         tier: "Interaction",tierBg: "bg-[#dbeafe]", tierText: "text-[#1d4ed8]", weight: 1.0, count: 5, pts: Math.round(depthTotal * 0.18) },
+    ];
+  } else if (score >= 30) {
+    events = [
+      { name: "Webinar attended",  tier: "Engagement",  tierBg: "bg-[#ede9fe]", tierText: "text-[#6d28d9]", weight: 2.5, count: 1, pts: Math.round(depthTotal * 0.40) },
+      { name: "Email clicked",     tier: "Interaction", tierBg: "bg-[#dbeafe]", tierText: "text-[#1d4ed8]", weight: 1.0, count: 4, pts: Math.round(depthTotal * 0.35) },
+      { name: "Email opened",      tier: "Interaction", tierBg: "bg-[#dbeafe]", tierText: "text-[#1d4ed8]", weight: 0.5, count: 6, pts: Math.round(depthTotal * 0.25) },
+    ];
+  } else {
+    events = [
+      { name: "Email opened",   tier: "Interaction", tierBg: "bg-[#dbeafe]", tierText: "text-[#1d4ed8]", weight: 0.5, count: 3, pts: Math.round(depthTotal * 0.55) },
+      { name: "Email received", tier: "Reach",       tierBg: "bg-[#f3f4f6]", tierText: "text-[#374151]", weight: 0.1, count: 8, pts: Math.round(depthTotal * 0.45) },
+    ];
+  }
+
+  const channels = score >= 60 ? 4 : score >= 30 ? 2 : 1;
+  const breadthLabel = channels === 1 ? "1 channel" : channels === 2 ? "2 channels" : channels < 4 ? "3 channels" : "4+ channels";
+
+  return { events, depthTotal, breadthTotal, channels, breadthLabel };
+}
+
+// ── HCO Signal Score ──────────────────────────────────────────────
+const HCO_TIERS = [
+  { lv: 1, label: "Reach",       def: "Content delivered. No action required.",       weightRange: "0.1 – 0.5", examples: "Email sent, banner impression, event invitation, ad impression",   bg: "bg-[#f3f4f6]",  text: "text-[#374151]"  },
+  { lv: 2, label: "Interaction", def: "Minimal voluntary action by someone.",          weightRange: "0.5 – 1.5", examples: "Email open, product page visited, social like, event registration", bg: "bg-[#dbeafe]",  text: "text-[#1d4ed8]"  },
+  { lv: 3, label: "Engagement",  def: "Deliberate, meaningful engagement.",            weightRange: "2.0 – 4.0", examples: "Webinar attended, content downloaded, product enquiry",             bg: "bg-[#ede9fe]",  text: "text-[#6d28d9]"  },
+  { lv: 4, label: "Advocacy",    def: "Active promotion or strong intent signal.",     weightRange: "4.0 – 6.0", examples: "Referral, repeat order, formulary inclusion request",              bg: "bg-[#dcfce7]",  text: "text-[#15803d]"  },
+];
+
+function getHcoSignalScore(id) {
+  const n = Number(id);
+  const pattern = n % 4;
+  const pools = [
+    [
+      { name: "Email sent",           tier: "Reach",       bg: "bg-[#f3f4f6]", text: "text-[#374151]", weight: 0.2, count: 20 + n % 10 },
+      { name: "Banner impression",    tier: "Reach",       bg: "bg-[#f3f4f6]", text: "text-[#374151]", weight: 0.1, count: 30 + n % 15 },
+      { name: "Email open",           tier: "Interaction", bg: "bg-[#dbeafe]", text: "text-[#1d4ed8]", weight: 0.8, count: 4  + n % 5  },
+    ],
+    [
+      { name: "Email sent",           tier: "Reach",       bg: "bg-[#f3f4f6]", text: "text-[#374151]", weight: 0.3, count: 25 + n % 12 },
+      { name: "Email open",           tier: "Interaction", bg: "bg-[#dbeafe]", text: "text-[#1d4ed8]", weight: 1.0, count: 10 + n % 7  },
+      { name: "Product page visited", tier: "Interaction", bg: "bg-[#dbeafe]", text: "text-[#1d4ed8]", weight: 0.8, count: 6  + n % 5  },
+      { name: "Webinar attended",     tier: "Engagement",  bg: "bg-[#ede9fe]", text: "text-[#6d28d9]", weight: 3.0, count: 2  + n % 3  },
+    ],
+    [
+      { name: "Email sent",           tier: "Reach",       bg: "bg-[#f3f4f6]", text: "text-[#374151]", weight: 0.3, count: 35 + n % 15 },
+      { name: "Event invitation",     tier: "Reach",       bg: "bg-[#f3f4f6]", text: "text-[#374151]", weight: 0.2, count: 15 + n % 8  },
+      { name: "Email open",           tier: "Interaction", bg: "bg-[#dbeafe]", text: "text-[#1d4ed8]", weight: 1.0, count: 14 + n % 8  },
+      { name: "Product page visited", tier: "Interaction", bg: "bg-[#dbeafe]", text: "text-[#1d4ed8]", weight: 0.8, count: 9  + n % 6  },
+      { name: "Webinar attended",     tier: "Engagement",  bg: "bg-[#ede9fe]", text: "text-[#6d28d9]", weight: 3.0, count: 3  + n % 3  },
+    ],
+    [
+      { name: "Email sent",           tier: "Reach",       bg: "bg-[#f3f4f6]", text: "text-[#374151]", weight: 0.3, count: 42 + n % 15 },
+      { name: "Email open",           tier: "Interaction", bg: "bg-[#dbeafe]", text: "text-[#1d4ed8]", weight: 1.0, count: 18 + n % 8  },
+      { name: "Product page visited", tier: "Interaction", bg: "bg-[#dbeafe]", text: "text-[#1d4ed8]", weight: 0.8, count: 12 + n % 6  },
+      { name: "Webinar attended",     tier: "Engagement",  bg: "bg-[#ede9fe]", text: "text-[#6d28d9]", weight: 3.0, count: 4  + n % 3  },
+      { name: "Formulary request",    tier: "Advocacy",    bg: "bg-[#dcfce7]", text: "text-[#15803d]", weight: 5.0, count: 1  + n % 2  },
+    ],
+  ];
+  const signals = pools[pattern].map((s) => ({ ...s, subtotal: parseFloat((s.weight * s.count).toFixed(1)) }));
+  const score   = Math.round(signals.reduce((sum, s) => sum + s.subtotal, 0));
+  return { score, signals };
+}
+
 function SortIndicator({ active, direction }) {
   return (
     <svg width="10" height="12" viewBox="0 0 10 12" fill="none" className="shrink-0">
@@ -3063,7 +3155,6 @@ function getPharmaScore(pharmacistIds) {
 export default function Profiles() {
   const navigate = useNavigate();
   const { uploadedDatabases } = useMappingContext();
-  const hasSource = uploadedDatabases.length > 0;
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") || "HCPs";
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -3088,9 +3179,9 @@ export default function Profiles() {
   // Effective conflict totals — scale with number of uploaded databases
   const uploadCount = uploadedDatabases.length;
   const hasShopifyFile = uploadedDatabases.some((db) => db.fileName === "Shopify sample.xlsx");
-  const effectiveHcpTotal   = uploadCount >= 5 ? HCP_CONFLICT_TOTAL : uploadCount >= 1 ? 2 : 0;
-  const effectiveHcoTotal   = uploadCount >= 5 || hasShopifyFile ? HCO_CONFLICT_TOTAL : 0;
-  const effectivePharmTotal = uploadCount >= 2 ? PHARMACIST_CONFLICT_TOTAL : 0;
+  const effectiveHcpTotal   = HCP_CONFLICT_TOTAL;
+  const effectiveHcoTotal   = HCO_CONFLICT_TOTAL;
+  const effectivePharmTotal = 0;
 
   // Which stakeholder tabs currently have unresolved conflicts
   const tabConflicts = {
@@ -3360,36 +3451,6 @@ export default function Profiles() {
     return true;
   });
 
-  if (!hasSource) {
-    return (
-      <div className="flex h-screen w-full bg-[#f7f8fa] font-['Inter',sans-serif]">
-        <Sidebar />
-        <main className="flex flex-1 items-center justify-center">
-          <div className="flex flex-col items-center gap-4 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f3f4f6]">
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="14" cy="14" r="10" stroke="#9ca3af" strokeWidth="1.5"/>
-                <path d="M10 14h8M14 10v8" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <p className="text-base font-semibold text-[#0a0a0a]">No source connected</p>
-              <p className="max-w-[360px] text-sm text-[#6a7282]">
-                No source has been connected or uploaded. Connect a source or upload a database to visualize your healthcare professional profiles.
-              </p>
-            </div>
-            <button
-              onClick={() => navigate("/?tab=databases")}
-              className="mt-1 rounded-[10px] bg-[#155dfc] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1247cc]"
-            >
-              Go to Data sources
-            </button>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
   return (
     <div className="flex h-screen w-full bg-[#f7f8fa] font-['Inter',sans-serif]">
       <Sidebar />
@@ -3553,6 +3614,14 @@ export default function Profiles() {
                   />
                 </div>
 
+                {/* HCP score configuration */}
+                <button
+                  onClick={() => navigate("/profiles/score-configuration?entity=hcp")}
+                  className="flex items-center gap-2 rounded-[10px] bg-[#155dfc] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-[#1249cc]"
+                >
+                  HCP score configuration
+                </button>
+
                 {/* Filter */}
                 <button
                   onClick={() => { setDraftFilters(appliedFilters); setFilterDropdown(null); setFilterOpen(true); }}
@@ -3565,14 +3634,6 @@ export default function Profiles() {
                       {activeFilterCount}
                     </span>
                   )}
-                </button>
-
-                {/* HCP score configuration */}
-                <button
-                  onClick={() => navigate("/leading-board/score-configuration?entity=hcp")}
-                  className="flex items-center gap-2 rounded-[10px] bg-[#155dfc] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-[#1249cc]"
-                >
-                  HCP score configuration
                 </button>
               </div>
 
@@ -3671,21 +3732,26 @@ export default function Profiles() {
                                         >
                                           {affIcp}
                                         </button>
-                                        {(row.missingFields?.length ?? 0) > 0 && (
-                                          <button
-                                            onClick={() => setScoreDetailModal({ type: "icp", row, aff, score: affIcp })}
-                                            className="flex shrink-0 items-center text-[#f59e0b] hover:text-[#d97706] transition-colors"
-                                            title={`${row.missingFields.length} field${row.missingFields.length > 1 ? "s" : ""} missing from configured sources`}
-                                          >
-                                            <WarningIcon />
-                                          </button>
-                                        )}
+                                        {/* warning icon hidden */}
                                       </div>
                                     );
                                     break;
-                                  case "engagementScore":
-                                    cell = <button onClick={() => setScoreDetailModal({ type: "eng", row, aff, score: affEngScore })} className="text-sm text-[#4a5565] underline decoration-dotted underline-offset-2 hover:text-[#155dfc]">{affEngScore}</button>;
+                                  case "engagementScore": {
+                                    const traj = trajectoryFor(row.id);
+                                    const tm   = TRAJ_META[traj];
+                                    cell = (
+                                      <div className="flex items-center gap-1.5">
+                                        <button
+                                          onClick={() => setScoreDetailModal({ type: "eng", row, aff, score: affEngScore, trajectory: traj })}
+                                          className="text-sm font-semibold text-[#0a0a0a] underline decoration-dotted underline-offset-2 hover:text-[#155dfc] tabular-nums"
+                                        >
+                                          {affEngScore}
+                                        </button>
+                                        <span className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold ${tm.bgClass} ${tm.textClass}`}>{traj}</span>
+                                      </div>
+                                    );
                                     break;
+                                  }
                                   case "priority":
                                     cell = <div className="flex justify-center"><span className={`rounded px-2.5 py-1 text-xs font-medium ${priorityStyles[getPriority(row.leadScore)]}`}>{getPriority(row.leadScore)}</span></div>;
                                     break;
@@ -3811,7 +3877,7 @@ export default function Profiles() {
 
                 {/* Score configuration button */}
                 <button
-                  onClick={() => navigate("/leading-board/score-configuration?entity=hco")}
+                  onClick={() => navigate("/profiles/score-configuration?entity=hco")}
                   className="flex items-center gap-2 rounded-[10px] bg-[#155dfc] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-[#1249cc]"
                 >
                   HCO score configuration
@@ -3854,7 +3920,10 @@ export default function Profiles() {
                         SAP
                       </th>
                       <th className="w-[120px] px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.6px] text-[#6a7282]">
-                        Score
+                        ICP Score
+                      </th>
+                      <th className="w-[140px] px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.6px] text-[#6a7282]">
+                        Engagement Score
                       </th>
                       <th className="w-[120px] px-6 py-4 text-center text-xs font-semibold uppercase tracking-[0.6px] text-[#6a7282]">
                         Priority
@@ -3917,6 +3986,25 @@ export default function Profiles() {
                               {getHospitalScore(row.hcpIds)}
                             </button>
                           </td>
+                          {/* Engagement Score */}
+                          <td className="px-6 py-5">
+                            {(() => {
+                              const { score: sigScore } = getHcoSignalScore(row.id);
+                              const traj = hcoTrajectoryFor(row.id);
+                              const tm   = TRAJ_META[traj];
+                              return (
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    onClick={() => setScoreDetailModal({ type: "hco-signal", row, aff: row.city, score: sigScore, trajectory: traj })}
+                                    className="text-sm font-semibold text-[#0a0a0a] underline decoration-dotted underline-offset-2 hover:text-[#155dfc] tabular-nums"
+                                  >
+                                    {sigScore}
+                                  </button>
+                                  <span className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold ${tm.bgClass} ${tm.textClass}`}>{traj}</span>
+                                </div>
+                              );
+                            })()}
+                          </td>
                           <td className="px-6 py-[17px]">
                             <div className="flex justify-center">
                               <span className={`rounded px-2.5 py-1 text-xs font-medium ${priorityStyles[getPriority(getHospitalScore(row.hcpIds))]}`}>
@@ -3928,7 +4016,7 @@ export default function Profiles() {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={10} className="px-6 py-12 text-center">
+                        <td colSpan={11} className="px-6 py-12 text-center">
                           <p className="text-sm text-[#6a7282]">
                             No hospitals match your search.
                           </p>
@@ -4073,7 +4161,7 @@ export default function Profiles() {
                     />
                   </div>
                   <button
-                    onClick={() => navigate("/leading-board/score-configuration?entity=hcp")}
+                    onClick={() => navigate("/profiles/score-configuration?entity=hcp")}
                     className="flex items-center gap-2 rounded-[10px] bg-[#155dfc] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-[#1249cc]"
                   >
                     Pharmacist score configuration
@@ -4095,19 +4183,17 @@ export default function Profiles() {
                           <TH w="130px">Type</TH>
                           <TH w="160px">Specialty Area</TH>
                           <TH w="160px">Role</TH>
-                          <TH w="220px">Academic Affiliation</TH>
                           <TH w="180px">Associations</TH>
                           <TH w="220px">Pharmacy / Chain</TH>
                           <TH w="180px">City · Region · ZIP</TH>
-                          <TH w="110px">Catchment</TH>
                           <TH w="130px">Patient Volume</TH>
                           <TH w="220px">Top Therapeutic Areas</TH>
                           <TH w="180px">Top Brands</TH>
                           <TH w="110px">Generic Ratio</TH>
                           <TH w="110px">Avg Rx / mo</TH>
                           <TH w="180px">Rep · Frequency</TH>
-                          <TH w="140px">Pref. Channel</TH>
                           <TH w="110px">Sentiment</TH>
+                          <TH w="110px">ICP Score</TH>
                           <TH w="120px">Engagement Score</TH>
                           <TH w="110px">Reimbursement</TH>
                         </tr>
@@ -4138,12 +4224,6 @@ export default function Profiles() {
                             <td className="px-4 py-4 whitespace-nowrap">
                               <span className="text-sm text-[#4a5565]">{row.role}</span>
                             </td>
-                            {/* Academic Affiliation */}
-                            <td className="px-4 py-4">
-                              {row.academicAffiliation
-                                ? <span className="text-sm text-[#4a5565]">{row.academicAffiliation}</span>
-                                : <span className="text-sm text-[#c0c7d0]">—</span>}
-                            </td>
                             {/* Associations */}
                             <td className="px-4 py-4">
                               <div className="flex flex-wrap gap-1">
@@ -4165,10 +4245,6 @@ export default function Profiles() {
                                 <span className="text-sm text-[#0a0a0a]">{row.city}</span>
                                 <span className="text-xs text-[#9ca3af]">{row.region} · {row.zip}</span>
                               </div>
-                            </td>
-                            {/* Catchment */}
-                            <td className="px-4 py-4 whitespace-nowrap">
-                              <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${catchmentStyles[row.catchment] ?? "bg-[#f3f4f6] text-[#4a5565]"}`}>{row.catchment}</span>
                             </td>
                             {/* Patient Volume */}
                             <td className="px-4 py-4 whitespace-nowrap">
@@ -4210,22 +4286,33 @@ export default function Profiles() {
                                 <span className="text-xs text-[#9ca3af]">{row.visitFrequency}</span>
                               </div>
                             </td>
-                            {/* Preferred Channel */}
-                            <td className="px-4 py-4 whitespace-nowrap">
-                              <span className="text-sm text-[#4a5565]">{row.preferredChannel}</span>
-                            </td>
                             {/* Sentiment */}
                             <td className="px-4 py-4 whitespace-nowrap">
                               <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${sentimentStyles[row.sentiment] ?? "bg-[#f3f4f6] text-[#4a5565]"}`}>{row.sentiment}</span>
                             </td>
+                            {/* ICP Score */}
+                            <td className="px-4 py-4 whitespace-nowrap text-center">
+                              <span className="text-sm font-semibold text-[#0a0a0a] tabular-nums">{row.leadScore}</span>
+                            </td>
                             {/* Engagement Score */}
                             <td className="px-4 py-4 whitespace-nowrap text-center">
-                              <button
-                                onClick={() => setScoreDetailModal({ type: "eng", row: { name: row.name }, aff: row.pharmacyName, score: row.kolScore })}
-                                className="text-sm font-medium text-[#0a0a0a] underline decoration-dotted underline-offset-2 hover:text-[#155dfc]"
-                              >
-                                {row.kolScore}
-                              </button>
+                              <div className="flex items-center justify-center gap-1.5">
+                                {(() => {
+                                  const traj = trajectoryFor(row.id);
+                                  const tm   = TRAJ_META[traj];
+                                  return (
+                                    <>
+                                      <button
+                                        onClick={() => setScoreDetailModal({ type: "eng", row: { name: row.name }, aff: row.pharmacyName, score: row.kolScore, trajectory: traj })}
+                                        className="text-sm font-semibold text-[#0a0a0a] underline decoration-dotted underline-offset-2 hover:text-[#155dfc] tabular-nums"
+                                      >
+                                        {row.kolScore}
+                                      </button>
+                                      <span className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold ${tm.bgClass} ${tm.textClass}`}>{traj}</span>
+                                    </>
+                                  );
+                                })()}
+                              </div>
                             </td>
                             {/* Reimbursement */}
                             <td className="px-4 py-4 whitespace-nowrap">
@@ -4234,7 +4321,7 @@ export default function Profiles() {
                           </tr>
                         )) : (
                           <tr>
-                            <td colSpan={20} className="px-6 py-12 text-center">
+                            <td colSpan={18} className="px-6 py-12 text-center">
                               <p className="text-sm text-[#6a7282]">No pharmacists match your search.</p>
                             </td>
                           </tr>
@@ -4353,7 +4440,7 @@ export default function Profiles() {
                     />
                   </div>
                   <button
-                    onClick={() => navigate("/leading-board/score-configuration?entity=hco")}
+                    onClick={() => navigate("/profiles/score-configuration?entity=hco")}
                     className="flex items-center gap-2 rounded-[10px] bg-[#155dfc] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-[#1249cc]"
                   >
                     Pharmacy score configuration
@@ -4586,7 +4673,7 @@ export default function Profiles() {
                     />
                   </div>
                   <button
-                    onClick={() => navigate("/leading-board/score-configuration?entity=signal")}
+                    onClick={() => navigate("/profiles/score-configuration?entity=signal")}
                     className="flex items-center gap-2 rounded-[10px] bg-[#155dfc] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-[#1249cc]"
                   >
                     Signal configuration
@@ -5079,19 +5166,15 @@ export default function Profiles() {
       {/* Score Detail Modal — ICP or Engagement, specific to clicked row */}
       {scoreDetailModal && (() => {
         const { type, row, aff, score } = scoreDetailModal;
-        const isIcp = type === "icp";
+        const isIcp      = type === "icp";
+        const isHcoSignal = type === "hco-signal";
         const dims = isIcp
           ? [
               { dim: "Specialty fit",                  weight: "40%", pct: Math.round(score * 0.40), badge: "bg-[#dbeafe] text-[#155dfc]", source: `${row.specialty} aligned with target segment` },
               { dim: "Institutional affiliation tier", weight: "35%", pct: Math.round(score * 0.35), badge: "bg-[#dbeafe] text-[#155dfc]", source: `${aff} — Tier ${score > 75 ? 1 : score > 50 ? 2 : 3} institution` },
               { dim: "Practice volume & influence",    weight: "25%", pct: Math.round(score * 0.25), badge: "bg-[#dbeafe] text-[#155dfc]", source: `${row.isKol ? "KOL — elevated peer recognition" : "Standard practice volume"}` },
             ]
-          : [
-              { dim: "Email opens & clicks",  weight: "30%", pct: Math.round(score * 0.30), badge: "bg-[#dcfce7] text-[#15803d]", source: "CRM email activity — trailing 12 months" },
-              { dim: "Webinar attendance",     weight: "25%", pct: Math.round(score * 0.25), badge: "bg-[#dcfce7] text-[#15803d]", source: "Webinar platform logs" },
-              { dim: "Content downloads",      weight: "25%", pct: Math.round(score * 0.25), badge: "bg-[#dcfce7] text-[#15803d]", source: "Asset management system" },
-              { dim: "Event participation",    weight: "20%", pct: Math.round(score * 0.20), badge: "bg-[#dcfce7] text-[#15803d]", source: "Event management & congress attendance" },
-            ];
+          : [];
         return (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setScoreDetailModal(null)}>
             <div className="w-[580px] max-h-[90vh] flex flex-col overflow-hidden rounded-[24px] border border-[rgba(154,168,188,0.2)] bg-white shadow-[0px_16px_32px_0px_rgba(0,0,0,0.16)]" onClick={(e) => e.stopPropagation()}>
@@ -5100,12 +5183,7 @@ export default function Profiles() {
                 <div>
                   <h2 className="text-[22px] font-semibold leading-[30px] text-[#1a212b]">
                     {isIcp ? "ICP Score" : "Engagement Score"} — <span className="text-[#155dfc]">{score}</span>
-                    {isIcp && (row.missingFields?.length ?? 0) > 0 && (
-                      <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-[#fef3c7] px-2 py-0.5 text-xs font-medium text-[#92400e]">
-                        <WarningIcon />
-                        {row.missingFields.length} field{row.missingFields.length > 1 ? "s" : ""} missing
-                      </span>
-                    )}
+                    {/* missing-fields badge hidden */}
                   </h2>
                   <p className="mt-1 text-sm text-[#4a5565]">{row.name} · {aff}</p>
                 </div>
@@ -5114,33 +5192,140 @@ export default function Profiles() {
 
               {/* Scrollable body */}
               <div className="flex flex-col gap-4 px-6 pb-6 overflow-y-auto">
-                <p className="text-sm leading-6 text-[#4a5565]">
-                  {isIcp
-                    ? "Measures how closely this HCP matches your Ideal Customer Profile at the selected institution. Each dimension contributes a weighted sub-score."
-                    : "Reflects the depth and recency of this HCP's brand interactions, adjusted for the selected product family context."}
-                </p>
+                {isHcoSignal ? (() => {
+                  const traj = scoreDetailModal.trajectory || "→";
+                  const tm   = TRAJ_META[traj];
+                  const { signals } = getHcoSignalScore(row.id);
+                  const baseSignals = signals.filter((s) => s.tier === "Reach" || s.tier === "Interaction");
+                  const baseTiers   = HCO_TIERS.filter((t) => t.lv <= 2);
+                  return (
+                    <>
+                      <p className="text-sm leading-6 text-[#4a5565]">
+                        Signals are anonymous digital touchpoints from unidentified individuals at this institution — they do not replace HCP-level engagement scores.
+                      </p>
 
-                {/* Score breakdown */}
-                <div className="flex flex-col divide-y divide-[#f3f4f6] rounded-[12px] border border-[#e5e7eb]">
-                  {dims.map(({ dim, weight, pct, badge, source }) => (
-                    <div key={dim} className="flex items-start gap-4 px-4 py-3">
-                      <div className="flex flex-col items-center gap-0.5">
-                        <span className={`rounded px-2 py-0.5 text-center text-xs font-semibold ${badge}`}>{weight}</span>
-                        <span className="text-[11px] font-semibold text-[#0a0a0a]">{pct} pts</span>
+                      {/* Section A: Detected Signals */}
+                      <div className="rounded-[12px] border border-[#e5e7eb] overflow-hidden">
+                        <div className="flex items-center gap-2 bg-[#f9fafb] border-b border-[#e5e7eb] px-4 py-2.5">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#155dfc] text-[10px] font-bold text-white shrink-0">A</span>
+                          <span className="text-xs font-semibold text-[#111318]">Detected signals this period</span>
+                        </div>
+                        <div className="grid grid-cols-[1fr_100px_52px_60px] border-b border-[#f3f4f6] bg-[#fafafa] px-4 py-1.5 gap-x-3">
+                          {["Signal", "Tier", "Count", "Pts"].map((h) => (
+                            <span key={h} className="text-[10px] font-semibold uppercase tracking-[0.5px] text-[#9ca3af]">{h}</span>
+                          ))}
+                        </div>
+                        {baseSignals.map((s, i) => (
+                          <div key={i} className={`grid grid-cols-[1fr_100px_52px_60px] items-center gap-x-3 px-4 py-2.5 ${i < baseSignals.length - 1 ? "border-b border-[#f3f4f6]" : ""}`}>
+                            <span className="text-xs text-[#111318]">{s.name}</span>
+                            <span className={`inline-flex w-fit rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${s.bg} ${s.text}`}>{s.tier}</span>
+                            <span className="text-xs text-[#374151] tabular-nums">{s.count}</span>
+                            <span className="text-xs font-bold text-[#155dfc] tabular-nums">{s.subtotal}</span>
+                          </div>
+                        ))}
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-[#0a0a0a]">{dim}</p>
-                        <p className="text-xs text-[#6a7282]">Source: {source}</p>
+
+                      {/* Trajectory */}
+                      <div className="flex items-center gap-3 rounded-[10px] border border-[#e5e7eb] px-4 py-3">
+                        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold ${tm.bgClass} ${tm.textClass}`}>{traj}</span>
+                        <div>
+                          <p className="text-xs font-semibold text-[#111318]">{tm.label}</p>
+                          <p className="text-[11px] text-[#6a7282]">{tm.def}</p>
+                        </div>
                       </div>
+
+                      {/* Total */}
+                      <div className="flex items-center justify-between rounded-[10px] bg-[#f9fafb] px-4 py-3">
+                        <span className="text-sm text-[#4a5565]">Total Engagement Score</span>
+                        <span className="text-lg font-bold text-[#0a0a0a]">{score}</span>
+                      </div>
+
+                      <p className="text-xs text-[#9ca3af]">Recalculated nightly from unmatched institutional digital signals. Does not include HCP-attributed activity.</p>
+                    </>
+                  );
+                })() : isIcp ? (
+                  <>
+                    <p className="text-sm leading-6 text-[#4a5565]">
+                      Measures how closely this HCP matches your Ideal Customer Profile at the selected institution. Each dimension contributes a weighted sub-score.
+                    </p>
+                    <div className="flex flex-col divide-y divide-[#f3f4f6] rounded-[12px] border border-[#e5e7eb]">
+                      {dims.map(({ dim, weight, pct, badge, source }) => (
+                        <div key={dim} className="flex items-start gap-4 px-4 py-3">
+                          <div className="flex flex-col items-center gap-0.5">
+                            <span className={`rounded px-2 py-0.5 text-center text-xs font-semibold ${badge}`}>{weight}</span>
+                            <span className="text-[11px] font-semibold text-[#0a0a0a]">{pct} pts</span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-[#0a0a0a]">{dim}</p>
+                            <p className="text-xs text-[#6a7282]">Source: {source}</p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                    <div className="flex items-center justify-between rounded-[10px] bg-[#f9fafb] px-4 py-3">
+                      <span className="text-sm text-[#4a5565]">Total ICP Score</span>
+                      <span className="text-lg font-bold text-[#0a0a0a]">{score} / 100</span>
+                    </div>
+                  </>
+                ) : (() => {
+                  const traj     = scoreDetailModal.trajectory || "→";
+                  const tm       = TRAJ_META[traj];
+                  const { events, depthTotal, breadthTotal, channels, breadthLabel } = getEngBreakdown(score);
+                  return (
+                    <>
+                      {/* Section A: Depth */}
+                      <div className="rounded-[12px] border border-[#e5e7eb] overflow-hidden">
+                        <div className="flex items-center gap-2 bg-[#f9fafb] border-b border-[#e5e7eb] px-4 py-2.5">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#155dfc] text-[10px] font-bold text-white shrink-0">A</span>
+                          <span className="text-xs font-semibold text-[#111318]">Depth Score — 70% of base</span>
+                          <span className="ml-auto text-xs font-bold text-[#155dfc]">{depthTotal} pts</span>
+                        </div>
+                        <div className="grid grid-cols-[1fr_130px_60px] border-b border-[#f3f4f6] bg-[#fafafa] px-4 py-1.5">
+                          {["Event", "Tier", "Pts"].map((h) => (
+                            <span key={h} className="text-[10px] font-semibold uppercase tracking-[0.5px] text-[#9ca3af]">{h}</span>
+                          ))}
+                        </div>
+                        {events.map((ev, i) => (
+                          <div key={i} className={`grid grid-cols-[1fr_130px_60px] items-center px-4 py-2.5 ${i < events.length - 1 ? "border-b border-[#f3f4f6]" : ""}`}>
+                            <span className="text-xs text-[#111318]">{ev.name}</span>
+                            <span className={`inline-flex w-fit rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${ev.tierBg} ${ev.tierText}`}>{ev.tier}</span>
+                            <span className="text-xs font-bold text-[#155dfc] tabular-nums">{ev.pts}</span>
+                          </div>
+                        ))}
+                      </div>
 
-                {/* Total */}
-                <div className="flex items-center justify-between rounded-[10px] bg-[#f9fafb] px-4 py-3">
-                  <span className="text-sm text-[#4a5565]">Total {isIcp ? "ICP" : "Engagement"} Score</span>
-                  <span className="text-lg font-bold text-[#0a0a0a]">{score} / 100</span>
-                </div>
+                      {/* Section B: Breadth */}
+                      <div className="rounded-[12px] border border-[#e5e7eb] overflow-hidden">
+                        <div className="flex items-center gap-2 bg-[#f9fafb] border-b border-[#e5e7eb] px-4 py-2.5">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#155dfc] text-[10px] font-bold text-white shrink-0">B</span>
+                          <span className="text-xs font-semibold text-[#111318]">Breadth Score — 30% of base</span>
+                          <span className="ml-auto text-xs font-bold text-[#155dfc]">{breadthTotal} pts</span>
+                        </div>
+                        <div className="flex items-center justify-between px-4 py-3">
+                          <span className="text-xs text-[#374151]">Distinct channels active</span>
+                          <span className="text-xs font-semibold text-[#111318]">{breadthLabel}</span>
+                        </div>
+                      </div>
+
+                      {/* Trajectory */}
+                      <div className="flex items-center gap-3 rounded-[10px] border border-[#e5e7eb] px-4 py-3">
+                        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold ${tm.bgClass} ${tm.textClass}`}>{traj}</span>
+                        <div>
+                          <p className="text-xs font-semibold text-[#111318]">{tm.label}</p>
+                          <p className="text-[11px] text-[#6a7282]">{tm.def}</p>
+                        </div>
+                      </div>
+
+                      {/* Total */}
+                      <div className="flex items-center justify-between rounded-[10px] bg-[#f9fafb] px-4 py-3">
+                        <span className="text-sm text-[#4a5565]">Total Engagement Score</span>
+                        <span className="text-lg font-bold text-[#0a0a0a]">{score} / 100</span>
+                      </div>
+
+                      <p className="text-xs text-[#9ca3af]">Recalculated nightly. May vary when a different product family context is selected.</p>
+                    </>
+                  );
+                })()}
 
                 {/* Missing data — ICP only */}
                 {isIcp && (row.missingFields?.length ?? 0) > 0 && (
@@ -5175,8 +5360,6 @@ export default function Profiles() {
                     </div>
                   </div>
                 )}
-
-                <p className="text-xs text-[#9ca3af]">Recalculated nightly. May vary when a different product family context is selected.</p>
               </div>
             </div>
           </div>

@@ -9,8 +9,8 @@ import {
 } from "../components/icons";
 
 /* ── Exports ──────────────────────────────────────────────────── */
-export const HCO_CONFLICT_TOTAL = 2;
-export const HCP_CONFLICT_TOTAL = 3;
+export const HCO_CONFLICT_TOTAL = 3;
+export const HCP_CONFLICT_TOTAL = 2;
 export const PHARMACIST_CONFLICT_TOTAL = 1;
 export const CONFLICT_TOTAL = HCO_CONFLICT_TOTAL;
 
@@ -75,6 +75,19 @@ const hcoConflicts = [
       { attribute: "Health network", newValue: "MassGen Partners",  existingValue: "UT Southwestern Network" },
     ],
   },
+  {
+    type: "possible_duplicate",
+    entity: "Munich University Hospital",
+    file: "upload_jan_q1.csv",
+    confidence: "78%",
+    rows: [
+      { attribute: "Entity name",     newValue: "Munich University Clinic",           existingValue: "Klinikum der Universität München",    status: "conflict" },
+      { attribute: "NPI/Number",      newValue: "4418293741",                          existingValue: "4418293741",                          status: "match"   },
+      { attribute: "Speciality",      newValue: "General Surgery",                    existingValue: "General Surgery",                     status: "match"   },
+      { attribute: "Primary address", newValue: "Marchioninistr. 15, 81377 München",  existingValue: "Nussbaumstr. 20, 80336 München",      status: "conflict" },
+      { attribute: "Phone",           newValue: "+49 89 4400-0",                      existingValue: "+49 89 5160-0",                       status: "conflict" },
+    ],
+  },
 ];
 
 const hcpConflicts = [
@@ -107,19 +120,6 @@ const hcpConflicts = [
       { attribute: "Date of birth", newValue: "14 Mar 1982",         existingValue: "29 Jul 1975"    },
       { attribute: "Gender",        newValue: "Female",               existingValue: "Female"         },
       { attribute: "Languages",     newValue: "French, English",      existingValue: "French"         },
-    ],
-  },
-  {
-    type: "possible_duplicate",
-    entity: "Dr. Andrew Müller",
-    file: "doctors_q1.csv",
-    confidence: "87%",
-    rows: [
-      { attribute: "Full name",   newValue: "Andrew Müller",                existingValue: "A. Müller",                           status: "conflict" },
-      { attribute: "NPI",         newValue: "5612034789",                   existingValue: "5612034789",                          status: "match"   },
-      { attribute: "Specialty",   newValue: "Nephrology",                   existingValue: "Nephrology",                          status: "match"   },
-      { attribute: "Affiliation", newValue: "Charité Berlin",               existingValue: "Charité – Universitätsmedizin Berlin",status: "conflict" },
-      { attribute: "License No.", newValue: "DE-BE-78432",                  existingValue: "Not on file",                         status: "conflict", existingItalic: true },
     ],
   },
 ];

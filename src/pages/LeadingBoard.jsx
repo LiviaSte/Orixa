@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import { useMappingContext } from "../MappingContext";
 import {
   SearchIcon20,
   FilterIcon,
@@ -70,8 +69,6 @@ const stageBadge = (stage) => {
 
 export default function LeadingBoard() {
   const navigate = useNavigate();
-  const { uploadedDatabases } = useMappingContext();
-  const hasSource = uploadedDatabases.length >= 5;
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredLeads = allLeads.filter((lead) => {
@@ -84,37 +81,6 @@ export default function LeadingBoard() {
       lead.stage.toLowerCase().includes(q)
     );
   });
-
-  if (!hasSource) {
-    return (
-      <div className="flex h-screen w-full bg-[#f7f8fa] font-['Inter',sans-serif]">
-        <Sidebar />
-        <main className="flex flex-1 items-center justify-center">
-          <div className="flex flex-col items-center gap-4 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f3f4f6]">
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="4" y="14" width="4" height="10" rx="1" stroke="#9ca3af" strokeWidth="1.5"/>
-                <rect x="12" y="9" width="4" height="15" rx="1" stroke="#9ca3af" strokeWidth="1.5"/>
-                <rect x="20" y="4" width="4" height="20" rx="1" stroke="#9ca3af" strokeWidth="1.5"/>
-              </svg>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <p className="text-base font-semibold text-[#0a0a0a]">No source connected</p>
-              <p className="max-w-[360px] text-sm text-[#6a7282]">
-                No source has been connected or uploaded. Connect a source or upload a database to view your lead board rankings.
-              </p>
-            </div>
-            <button
-              onClick={() => navigate("/?tab=databases")}
-              className="mt-1 rounded-[10px] bg-[#155dfc] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1247cc]"
-            >
-              Go to Data sources
-            </button>
-          </div>
-        </main>
-      </div>
-    );
-  }
 
   return (
     <div className="flex h-screen w-full bg-[#f7f8fa] font-['Inter',sans-serif]">

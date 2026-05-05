@@ -1067,7 +1067,6 @@ function RangeDetailModal({ range: initialRange, areas, currentFranchiseId, onSa
 export default function Products() {
   const navigate = useNavigate();
   const { uploadedDatabases } = useMappingContext();
-  const hasSource = uploadedDatabases.length > 0;
 
   const isShopify = () => uploadedDatabases.some((db) => db.fileName === "Shopify sample.xlsx");
 
@@ -1245,34 +1244,6 @@ export default function Products() {
   };
 
   // ── No source state ───────────────────────────────────────────
-
-  if (!hasSource) {
-    return (
-      <div className="flex h-screen w-full bg-[#f7f8fa] font-['Inter',sans-serif]">
-        <Sidebar />
-        <main className="flex flex-1 items-center justify-center">
-          <div className="flex flex-col items-center gap-4 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f3f4f6]">
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                <path d="M14 3C8.477 3 4 7.477 4 13s4.477 10 10 10 10-4.477 10-10S19.523 3 14 3z" stroke="#9ca3af" strokeWidth="1.5"/>
-                <path d="M14 9v5l3 3" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <p className="text-base font-semibold text-[#0a0a0a]">No source connected</p>
-              <p className="max-w-[340px] text-sm text-[#6a7282]">
-                Upload a database to start managing your product catalogue.
-              </p>
-            </div>
-            <button onClick={() => navigate("/")}
-              className="mt-1 rounded-[10px] bg-[#155dfc] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#1247cc]">
-              Go to Data sources
-            </button>
-          </div>
-        </main>
-      </div>
-    );
-  }
 
   // ── Main render ───────────────────────────────────────────────
 

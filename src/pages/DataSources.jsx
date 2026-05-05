@@ -124,20 +124,12 @@ export default function DataSources() {
       <main className="flex-1 overflow-auto">
         <div className="flex flex-col gap-6 p-8">
 
-          {/* Page header */}
-          <div className="flex flex-col gap-2">
-            <h1 className="text-2xl font-medium leading-9 text-[#0a0a0a]">Data sources</h1>
-            <p className="max-w-[700px] text-base leading-6 text-[#4a5565]">
-              Centralize your pharma enterprise data. Manually upload the files you need to perform analysis.
-            </p>
-          </div>
-
-          {/* Databases header + upload button */}
+          {/* Page header + upload button */}
           <div className="flex items-start justify-between">
-            <div className="flex flex-col gap-1">
-              <h2 className="text-xl font-medium leading-[30px] text-[#0a0a0a]">Databases</h2>
-              <p className="text-sm text-[#4a5565]">
-                Manually upload the files you need to perform analysis.
+            <div className="flex flex-col gap-2">
+              <h1 className="text-2xl font-medium leading-9 text-[#0a0a0a]">Data sources</h1>
+              <p className="max-w-[700px] text-base leading-6 text-[#4a5565]">
+                Centralize your pharma enterprise data. Manually upload the files you need to perform analysis.
               </p>
             </div>
             <div className="flex flex-col items-end gap-1">
@@ -172,22 +164,17 @@ export default function DataSources() {
                 const saved = card.mappingDomain ? getMapping(card.mappingDomain) : null;
                 const isMapped = !!saved;
                 const clickPath = isMapped ? card.mappingPath : card.uploadPath;
-
                 return (
                   <div
                     key={card.key}
                     onClick={() => clickPath && navigate(clickPath)}
                     className={`flex flex-col gap-4 rounded-[14px] border bg-white px-6 pb-4 pt-6 ${
-                      clickPath
-                        ? "cursor-pointer transition-all hover:border-[#155dfc] hover:shadow-sm"
-                        : ""
+                      clickPath ? "cursor-pointer transition-all hover:border-[#155dfc] hover:shadow-sm" : ""
                     } ${isMapped ? "border-[#00c950]/30" : "border-gray-200"}`}
                   >
                     <div className="flex items-start justify-between">
                       <div className={`flex h-10 w-10 items-center justify-center rounded-[10px] ${card.iconBg}`}>
-                        <span className={card.iconColor}>
-                          <card.icon />
-                        </span>
+                        <span className={card.iconColor}><card.icon /></span>
                       </div>
                       {isMapped ? (
                         <span className="inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-medium uppercase tracking-[0.3px] text-[#008236] bg-[#f0fdf4]">
@@ -271,77 +258,8 @@ export default function DataSources() {
             </div>
           )}
 
-          {/* Projects database */}
-          <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-medium leading-[30px] text-[#0a0a0a]">Projects database</h2>
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af]">
-                    <SearchIcon />
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="Search by file name or project..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-[320px] rounded-[10px] border border-[#d1d5dc] bg-white py-2 pl-10 pr-4 text-sm text-[#0a0a0a] placeholder:text-[rgba(10,10,10,0.5)] focus:border-[#155dfc] focus:outline-none focus:ring-1 focus:ring-[#155dfc]"
-                  />
-                </div>
-                <button className="flex items-center gap-2 rounded-[10px] border border-[#d1d5dc] bg-white px-4 py-2 text-sm font-medium text-[#0a0a0a] transition-colors hover:bg-gray-50">
-                  <FilterIcon />
-                  Filter
-                </button>
-              </div>
-            </div>
-
-            <div className="overflow-hidden rounded-[14px] border border-gray-200 bg-white">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200 bg-[#f9fafb]">
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.6px] text-[#6a7282]">File name</th>
-                    <th className="w-[99px] px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.6px] text-[#6a7282]">Format</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.6px] text-[#6a7282]">Project</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.6px] text-[#6a7282]">Upload date</th>
-                    <th className="w-[131px] px-6 py-3 text-left text-xs font-semibold uppercase tracking-[0.6px] text-[#6a7282]">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredRows.length > 0 ? (
-                    filteredRows.map((row) => (
-                      <tr key={row.fileName} className="border-b border-gray-200 last:border-b-0">
-                        <td className="px-6 py-[19px]">
-                          <div className="flex items-center gap-3">
-                            <FileIcon />
-                            <span className="text-sm font-medium text-[#101828]">{row.fileName}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-[17px]">
-                          <span className="rounded px-2.5 py-0.5 text-xs font-medium uppercase text-[#008236] bg-[#f0fdf4]">
-                            {row.format}
-                          </span>
-                        </td>
-                        <td className="px-6 py-[19px] text-sm text-[#4a5565]">{row.project}</td>
-                        <td className="px-6 py-[19px] text-sm text-[#4a5565]">{row.uploadDate}</td>
-                        <td className="px-6 py-[17px]">
-                          <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#f0fdf4] px-2.5 py-0.5 text-xs font-medium text-[#008236]">
-                            <span className="h-1.5 w-1.5 rounded-full bg-[#00c950]" />
-                            {row.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-sm text-[#99a1af]">
-                        No files uploaded yet
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          {/* Projects database — hidden */}
+          {/* Recommended data domains — hidden */}
 
         </div>
       </main>

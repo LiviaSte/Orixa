@@ -7,7 +7,13 @@ export function MappingProvider({ children }) {
   const [savedMappings, setSavedMappings] = useState({});
 
   // List of uploaded databases: [{ id, fileName, format, uploadDate, savedAt, mappingRows, totalRows }]
-  const [uploadedDatabases, setUploadedDatabases] = useState([]);
+  const [uploadedDatabases, setUploadedDatabases] = useState([
+    { id: "udb-001", fileName: "Sales.xlsx",     format: "XLSX", uploadDate: "01/01/2025", savedAt: "2025-01-01T00:00:00.000Z", totalRows: 1240, mappingRows: [] },
+    { id: "udb-002", fileName: "Customers.xlsx", format: "XLSX", uploadDate: "01/01/2025", savedAt: "2025-01-01T00:00:00.000Z", totalRows: 890,  mappingRows: [] },
+    { id: "udb-003", fileName: "Products.xlsx",  format: "XLSX", uploadDate: "01/01/2025", savedAt: "2025-01-01T00:00:00.000Z", totalRows: 356,  mappingRows: [] },
+    { id: "udb-004", fileName: "Congress.xlsx",  format: "XLSX", uploadDate: "01/01/2025", savedAt: "2025-01-01T00:00:00.000Z", totalRows: 720,  mappingRows: [] },
+    { id: "udb-005", fileName: "Contacts.xlsx",  format: "XLSX", uploadDate: "01/01/2025", savedAt: "2025-01-01T00:00:00.000Z", totalRows: 2100, mappingRows: [] },
+  ]);
 
   const saveMapping = (domain, data) => {
     setSavedMappings((prev) => ({

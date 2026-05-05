@@ -38,7 +38,7 @@ export default function App() {
         <Route path="/profiles/lead-signal/:id" element={<AnonymousLeadDetail />} />
         <Route path="/profiles/pharmacist/:id" element={<PharmacistDetail />} />
         <Route path="/leading-board" element={<LeadingBoard />} />
-        <Route path="/leading-board/score-configuration" element={<ScoreConfiguration />} />
+        <Route path="/profiles/score-configuration" element={<ScoreConfiguration />} />
         <Route path="/campaigns" element={<Campaigns />} />
         <Route path="/projects/:id" element={<ProjectDetail />} />
         <Route path="/products" element={<Products />} />
