@@ -1070,14 +1070,12 @@ export default function Products() {
 
   const isShopify = () => uploadedDatabases.some((db) => db.fileName === "Shopify sample.xlsx");
 
-  const [areas, setAreas] = useState(() =>
-    isShopify() ? SHOPIFY_THERAPEUTIC_AREAS : DEFAULT_THERAPEUTIC_AREAS
-  );
+  const [areas, setAreas] = useState(() => SHOPIFY_THERAPEUTIC_AREAS);
   const [expandedTaIds, setExpandedTaIds] = useState(() =>
-    isShopify() ? new Set(SHOPIFY_THERAPEUTIC_AREAS.map((ta) => ta.id)) : new Set()
+    new Set(SHOPIFY_THERAPEUTIC_AREAS.map((ta) => ta.id))
   );
   const [selectedFranchiseId, setSelectedFranchiseId] = useState(() =>
-    isShopify() ? SHOPIFY_THERAPEUTIC_AREAS[0].franchises[0].id : null
+    SHOPIFY_THERAPEUTIC_AREAS[0].franchises[0].id
   );
   const [areaSearch, setAreaSearch] = useState("");
 
