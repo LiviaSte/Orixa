@@ -179,7 +179,7 @@ const makeDefaultHCPProfiles = () => [
     isDefault: true,
     sections: [
       {
-        id: "A", label: "Profile Fit Score", maxPoints: 35, enabled: true,
+        id: "A", label: "Profile Fit Score", maxPoints: 35, enabled: true, productImpactedAll: true,
         rows: [
           {
             id: "A1", variable: "Specialty match",
@@ -231,7 +231,7 @@ const makeDefaultHCPProfiles = () => [
         removedRows: [],
       },
       {
-        id: "B", label: "Role & Influence Score", maxPoints: 35, enabled: true,
+        id: "B", label: "Role & Influence Score", maxPoints: 35, enabled: true, productImpactedAll: true,
         rows: [
           {
             id: "B1", variable: "Decision-making role",
@@ -273,7 +273,7 @@ const makeDefaultHCPProfiles = () => [
         removedRows: [],
       },
       {
-        id: "C", label: "HCO ICP Score", maxPoints: 10, enabled: true, fixedSource: true,
+        id: "C", label: "HCO ICP Score", maxPoints: 10, enabled: true, fixedSource: true, productImpactedAll: true,
         rows: [
           { id: "C1", variable: "HCO ICP associated account is ≥ 70", subValues: [{ id: "C1a", label: "≥ 70", points: 10 }], sources: [{ id: "c-src-1", connector: "HCO ICP Score", path: [] }] },
           { id: "C2", variable: "HCO ICP associated account is 40–69", subValues: [{ id: "C2a", label: "40–69", points: 5 }], sources: [{ id: "c-src-2", connector: "HCO ICP Score", path: [] }] },
@@ -282,7 +282,7 @@ const makeDefaultHCPProfiles = () => [
         removedRows: [],
       },
       {
-        id: "D", label: "Research & Academic Activity", maxPoints: 20, enabled: true,
+        id: "D", label: "Research & Academic Activity", maxPoints: 20, enabled: true, productImpactedAll: true,
         rows: [
           {
             id: "D1", variable: "Publications",
@@ -361,7 +361,7 @@ const makeDefaultHCOProfile = () => ({
           ],
         },
         {
-          id: "A3", variable: "Specialty departments",
+          id: "A3", variable: "Specialty departments", productImpacted: true,
           subValues: [
             { id: "A3a", label: "Target-indication match", points: 5 },
             { id: "A3b", label: "No match",                points: 0 },
@@ -415,6 +415,7 @@ const makeDefaultHCOProfile = () => ({
       label: "Commercial Variables",
       maxPoints: 70,
       enabled: true,
+      productImpactedAll: true,
       rows: [
         {
           id: "B1", variable: "Revenue",
@@ -500,7 +501,7 @@ const makeDefaultHCOProfile = () => ({
           ],
         },
         {
-          id: "B9", variable: "Payment reliability",
+          id: "B9", variable: "Payment reliability", productIndependent: true,
           subValues: [
             { id: "B9a", label: "No overdue invoices",   points: 5 },
             { id: "B9b", label: "Minor delays",          points: 2 },
@@ -836,11 +837,6 @@ function EditRowModal({ row, sectionMaxPoints, allRows, onSave, onClose, fixedSo
           <div>
             <div className="flex items-center justify-between mb-3">
               <label className="text-xs font-semibold uppercase tracking-[0.5px] text-[#6a7282]">Score tiers</label>
-              {overBudget && (
-                <span className="text-xs font-medium text-[#dc2626]">
-                  ⚠ Exceeds section budget by {totalMax - sectionMaxPoints} pts
-                </span>
-              )}
             </div>
             <div className="flex flex-col gap-2">
               {subValues.map((sv) => (
@@ -963,6 +959,14 @@ function SectionCard({ section, onToggle, onUpdateRow, onRemoveRow, onRestoreRow
               {section.id}
             </span>
             <span className="text-sm font-semibold text-[#111318]">{section.label}</span>
+            {section.productImpactedAll && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-[#ddd6fe] bg-[#ede9fe] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#6d28d9]">
+                <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
+                  <path d="M1 1.5h7M2 4h5M3 6.5h3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+                </svg>
+                Product-impacted
+              </span>
+            )}
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
               className={`shrink-0 text-[#9ca3af] transition-transform duration-150 ${collapsed ? "-rotate-90" : ""}`}>
               <path d="M3 5l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1002,8 +1006,21 @@ function SectionCard({ section, onToggle, onUpdateRow, onRemoveRow, onRestoreRow
               <div key={row.id}
                 className={`grid grid-cols-[1.4fr_1.6fr_1.1fr_72px] items-start gap-0 px-6 py-4 hover:bg-[#fafafa] transition-colors ${idx < section.rows.length - 1 ? "border-b border-[#f3f4f6]" : ""}`}>
                 {/* Variable name */}
-                <div className="pr-4 pt-0.5">
+                <div className="pr-4 pt-0.5 flex flex-col gap-1.5">
                   <p className="text-sm font-semibold text-[#111318]">{row.variable}</p>
+                  {row.productImpacted && !section.productImpactedAll && (
+                    <span className="inline-flex w-fit items-center gap-1 rounded-full border border-[#ddd6fe] bg-[#ede9fe] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#6d28d9]">
+                      <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
+                        <path d="M1 1.5h7M2 4h5M3 6.5h3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+                      </svg>
+                      Product-impacted
+                    </span>
+                  )}
+                  {row.productIndependent && section.productImpactedAll && (
+                    <span className="inline-flex w-fit items-center gap-1 rounded-full border border-[#e5e7eb] bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#6a7282]">
+                      Product-independent
+                    </span>
+                  )}
                 </div>
 
                 {/* Sub-values */}
@@ -1042,12 +1059,31 @@ function SectionCard({ section, onToggle, onUpdateRow, onRemoveRow, onRestoreRow
               </div>
             ))}
 
+            {/* Block-level over-budget banner */}
+            {isOver && (
+              <div className="flex items-start gap-3 border-t border-[#fecaca] bg-[#fff5f5] px-6 py-3">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0 mt-0.5 text-[#dc2626]">
+                  <path d="M8 1.5L14.5 13H1.5L8 1.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+                  <path d="M8 6v3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+                  <circle cx="8" cy="11" r="0.6" fill="currentColor"/>
+                </svg>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-[#dc2626]">
+                    Punteggio massimo superato di {totalUsed - section.maxPoints} pt{totalUsed - section.maxPoints > 1 ? "s" : ""}
+                  </p>
+                  <p className="text-xs text-[#b91c1c] mt-0.5">
+                    La somma dei valori delle variabili ({totalUsed} pts) supera il limite del blocco ({section.maxPoints} pts).
+                  </p>
+                </div>
+                <span className="shrink-0 text-sm font-bold text-[#dc2626]">{totalUsed} / {section.maxPoints} pts</span>
+              </div>
+            )}
+
             {/* Footer total */}
             <div className="flex items-center justify-between border-t border-[#f3f4f6] bg-[#fafafa] px-6 py-2.5">
-              <span className="text-xs text-[#9ca3af]">Sum of max values per variable</span>
+              <span className="text-xs text-[#9ca3af]">Somma dei valori massimi per variabile</span>
               <span className={`text-sm font-bold ${isOver ? "text-[#dc2626]" : totalUsed === section.maxPoints ? "text-[#16a34a]" : "text-[#f59e0b]"}`}>
                 {totalUsed} / {section.maxPoints} pts
-                {isOver && " ⚠"}
               </span>
             </div>
           </div>
@@ -1737,6 +1773,7 @@ function EditBreadthModal({ entry, onSave, onClose }) {
 
 function EditEventModal({ event, onSave, onClose }) {
   const [weight, setWeight] = useState(event.weight);
+  const [cap, setCap]       = useState(event.cap ?? "");
   const [sources, setSources] = useState((event.sources || []).map((s) => ({ ...s })));
 
   return (
@@ -1756,14 +1793,29 @@ function EditEventModal({ event, onSave, onClose }) {
             <p className="w-full rounded-lg border border-[#f3f4f6] bg-[#f9fafb] px-3 py-2 text-sm text-[#374151]">{event.name}</p>
           </div>
 
-          {/* Score */}
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-[0.5px] text-[#6a7282] mb-1.5">Score</label>
-            <div className="flex items-center gap-2">
-              <input type="number" step="0.1" min="0" value={weight}
-                onChange={(e) => setWeight(parseFloat(e.target.value) || 0)}
-                className="w-24 rounded-lg border border-[#e5e7eb] px-3 py-2 text-sm font-semibold text-center focus:border-[#155dfc] focus:outline-none focus:ring-1 focus:ring-[#155dfc]" />
-              <span className="text-xs text-[#9ca3af]">pts</span>
+          {/* Score + Cap side by side */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-[0.5px] text-[#6a7282] mb-1.5">Score</label>
+              <div className="flex items-center gap-2">
+                <input type="number" step="0.1" min="0" value={weight}
+                  onChange={(e) => setWeight(parseFloat(e.target.value) || 0)}
+                  className="w-24 rounded-lg border border-[#e5e7eb] px-3 py-2 text-sm font-semibold text-center focus:border-[#155dfc] focus:outline-none focus:ring-1 focus:ring-[#155dfc]" />
+                <span className="text-xs text-[#9ca3af]">pts</span>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-[0.5px] text-[#6a7282] mb-1.5">
+                Cap
+                <span className="ml-1 font-normal text-[#9ca3af] normal-case tracking-normal">— optional</span>
+              </label>
+              <div className="flex items-center gap-2">
+                <input type="number" min="1" step="1" value={cap}
+                  onChange={(e) => setCap(e.target.value)}
+                  placeholder="No limit"
+                  className="w-24 rounded-lg border border-[#e5e7eb] px-3 py-2 text-sm font-semibold text-center placeholder:font-normal placeholder:text-[#9ca3af] focus:border-[#155dfc] focus:outline-none focus:ring-1 focus:ring-[#155dfc]" />
+                <span className="text-xs text-[#9ca3af]">max</span>
+              </div>
             </div>
           </div>
 
@@ -1780,7 +1832,7 @@ function EditEventModal({ event, onSave, onClose }) {
             className="rounded-lg border border-[#e5e7eb] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#f9fafb] transition-colors">
             Cancel
           </button>
-          <button onClick={() => onSave(event.id, { weight, sources })}
+          <button onClick={() => onSave(event.id, { weight, cap: cap === "" ? "" : Number(cap), sources })}
             className="rounded-lg bg-[#155dfc] px-4 py-2 text-sm font-medium text-white hover:bg-[#1a4fd8] transition-colors">
             Save changes
           </button>
@@ -1837,10 +1889,99 @@ function RemovedEventsModal({ tierLabel, removedEvents, onRestore, onClose }) {
 // ENGAGEMENT SCORE TAB
 // ══════════════════════════════════════════════════════════════════
 
+function AddEventModal({ tier, onSave, onClose }) {
+  const [name, setName]       = useState("");
+  const [weight, setWeight]   = useState(1.0);
+  const [cap, setCap]         = useState("");
+  const [sources, setSources] = useState([]);
+  const meta = TIER_META[tier];
+  const canSave = name.trim().length > 0;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
+      <div className="w-full max-w-[520px] max-h-[85vh] flex flex-col rounded-xl bg-white shadow-2xl">
+        <div className="flex items-center justify-between border-b border-[#e5e7eb] px-6 py-4 shrink-0">
+          <div className="flex flex-col gap-1">
+            <h3 className="text-base font-semibold text-[#111318]">Add event</h3>
+            <span className={`inline-flex w-fit rounded-full px-2 py-0.5 text-[11px] font-semibold border ${meta.bg} ${meta.text} ${meta.border}`}>
+              {meta.label}
+            </span>
+          </div>
+          <button onClick={onClose} className="rounded p-1 text-[#9ca3af] hover:text-[#374151]">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-[0.5px] text-[#6a7282] mb-1.5">Event name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Webinar attended"
+              autoFocus
+              className="w-full rounded-lg border border-[#e5e7eb] px-3 py-2 text-sm text-[#111318] placeholder:text-[#9ca3af] focus:border-[#155dfc] focus:outline-none focus:ring-1 focus:ring-[#155dfc]"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-[0.5px] text-[#6a7282] mb-1.5">Score</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number" step="0.1" min="0" value={weight}
+                  onChange={(e) => setWeight(parseFloat(e.target.value) || 0)}
+                  className="w-24 rounded-lg border border-[#e5e7eb] px-3 py-2 text-sm font-semibold text-center focus:border-[#155dfc] focus:outline-none focus:ring-1 focus:ring-[#155dfc]"
+                />
+                <span className="text-xs text-[#9ca3af]">pts</span>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-[0.5px] text-[#6a7282] mb-1.5">
+                Cap
+                <span className="ml-1 font-normal text-[#9ca3af] normal-case tracking-normal">— optional</span>
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number" min="1" step="1" value={cap}
+                  onChange={(e) => setCap(e.target.value)}
+                  placeholder="No limit"
+                  className="w-24 rounded-lg border border-[#e5e7eb] px-3 py-2 text-sm font-semibold text-center placeholder:font-normal placeholder:text-[#9ca3af] focus:border-[#155dfc] focus:outline-none focus:ring-1 focus:ring-[#155dfc]"
+                />
+                <span className="text-xs text-[#9ca3af]">max</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-[0.5px] text-[#6a7282] mb-3">Sources</label>
+            <SourceEditor sources={sources} onChange={setSources} />
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-3 border-t border-[#e5e7eb] px-6 py-4 shrink-0">
+          <button onClick={onClose}
+            className="rounded-lg border border-[#e5e7eb] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#f9fafb] transition-colors">
+            Cancel
+          </button>
+          <button
+            onClick={() => canSave && onSave(tier, { name: name.trim(), weight, cap: cap === "" ? "" : Number(cap), sources })}
+            disabled={!canSave}
+            className="rounded-lg bg-[#155dfc] px-4 py-2 text-sm font-medium text-white hover:bg-[#1a4fd8] transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+            Add event
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function EngagementScoreTab() {
   const [events, setEvents] = useState(() => DEFAULT_EVENTS.map((e) => ({ ...e })));
   const [removedEvents, setRemovedEvents] = useState([]);
   const [editingEvent, setEditingEvent] = useState(null);
+  const [addingEventTier, setAddingEventTier] = useState(null);
   const [removedModalTier, setRemovedModalTier] = useState(null);
   const [editingBreadth, setEditingBreadth] = useState(null);
   const [breadth, setBreadth] = useState(() => DEFAULT_BREADTH.map((b) => ({ ...b })));
@@ -1879,6 +2020,18 @@ function EngagementScoreTab() {
   const saveEventEdit = (id, updates) => {
     setEvents((prev) => prev.map((e) => e.id === id ? { ...e, ...updates } : e));
     setEditingEvent(null);
+  };
+
+  const addEvent = (tier, { name, weight, cap, sources }) => {
+    setEvents((prev) => [...prev, {
+      id: `ev-custom-${Date.now()}`,
+      name,
+      tier,
+      weight,
+      cap: cap ?? "",
+      sources,
+    }]);
+    setAddingEventTier(null);
   };
 
   const toggleTier = (tier) =>
@@ -1931,8 +2084,8 @@ function EngagementScoreTab() {
             {tiers.every((t) => collapsedTiers[t]) ? "Open all" : "Close all"}
           </button>
         </div>
-        <div className="grid grid-cols-[1.4fr_110px_60px_1fr_72px] border-b border-[#f3f4f6] bg-[#fafafa] px-6 py-2 gap-x-3">
-          {["Event", "Type", "Score", "Source"].map((h) => (
+        <div className="grid grid-cols-[1.4fr_110px_60px_60px_1fr_72px] border-b border-[#f3f4f6] bg-[#fafafa] px-6 py-2 gap-x-3">
+          {["Event", "Type", "Score", "Cap", "Source"].map((h) => (
             <span key={h} className="text-[10px] font-semibold uppercase tracking-[0.5px] text-[#9ca3af]">{h}</span>
           ))}
           <span />
@@ -1974,7 +2127,7 @@ function EngagementScoreTab() {
 
               {!isCollapsed && tierEvents.map((ev) => (
                 <div key={ev.id}
-                  className="grid grid-cols-[1.4fr_110px_60px_1fr_72px] items-start px-6 py-4 gap-x-3 hover:bg-[#fafafa] transition-colors border-b border-[#f3f4f6]">
+                  className="grid grid-cols-[1.4fr_110px_60px_60px_1fr_72px] items-start px-6 py-4 gap-x-3 hover:bg-[#fafafa] transition-colors border-b border-[#f3f4f6]">
                   <p className="text-sm font-semibold text-[#111318] pt-0.5">{ev.name}</p>
                   <div className="pt-0.5">
                     <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold border ${meta.bg} ${meta.text} ${meta.border}`}>
@@ -1982,6 +2135,9 @@ function EngagementScoreTab() {
                     </span>
                   </div>
                   <p className={`text-sm font-bold tabular-nums pt-0.5 ${ev.weight > 0 ? "text-[#155dfc]" : "text-[#d1d5dc]"}`}>{ev.weight}</p>
+                  <p className="text-sm tabular-nums pt-0.5 text-[#374151]">
+                    {ev.cap !== "" && ev.cap != null ? ev.cap : <span className="text-[#d1d5dc]">—</span>}
+                  </p>
                   <div className="flex flex-wrap gap-1 pt-0.5">
                     {(ev.sources || []).map((s) => <SourcePill key={s.id} source={s} />)}
                   </div>
@@ -2002,9 +2158,20 @@ function EngagementScoreTab() {
                 </div>
               ))}
               {!isCollapsed && tierEvents.length === 0 && (
-                <div className="px-6 py-6 text-center text-sm text-[#9ca3af] border-b border-[#f3f4f6]">
-                  No events. Restore removed ones using the button above.
+                <div className="px-6 py-4 text-center text-sm text-[#9ca3af] border-b border-[#f3f4f6]">
+                  No events. Restore removed ones or add a new one below.
                 </div>
+              )}
+              {!isCollapsed && (
+                <button
+                  onClick={() => setAddingEventTier(tier)}
+                  className="flex w-full items-center gap-2 border-b border-[#f3f4f6] px-6 py-2.5 text-xs font-medium text-[#155dfc] hover:bg-[#eff6ff] transition-colors"
+                >
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                  Add event
+                </button>
               )}
             </div>
           );
@@ -2014,6 +2181,9 @@ function EngagementScoreTab() {
       {/* Modals */}
       {editingEvent && (
         <EditEventModal event={editingEvent} onSave={saveEventEdit} onClose={() => setEditingEvent(null)} />
+      )}
+      {addingEventTier && (
+        <AddEventModal tier={addingEventTier} onSave={addEvent} onClose={() => setAddingEventTier(null)} />
       )}
       {removedModalTier && (
         <RemovedEventsModal

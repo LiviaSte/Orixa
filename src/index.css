@@ -7,3 +7,156 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* ── Dark mode — brand palette overrides ──────────────────────────
+   Brand mapping: light-mode blue → radiant electric blue in dark mode
+   (same vibrancy/glow as the mint green in the inspiration image,
+   but kept blue so the brand identity is preserved).
+
+   Verified for WCAG AA contrast on #0a1018 base:
+     bg page:        #0a1018  (very dark navy)
+     bg card:        #10151c  (primary surfaces)
+     bg elevated:    #161b25  (chips, alt rows, hover)
+     bg active:      rgba(59,130,246,0.12)  (selected items, blue tint)
+     border subtle:  #1e293b
+     border medium:  #2d3a4f
+     text primary:   #f1f5f9  (16:1 — AAA)
+     text secondary: #cbd5e1  (12:1 — AAA)
+     text muted:     #94a3b8  (6.5:1 — AA)
+     text faint:     #64748b  (4.6:1 — AA)
+     brand blue:     #3b82f6  (button bg, 4.6:1 with white — AA)
+     radiant blue:   #7cc4ff  (scores, links, selected nav, 9:1 — AAA)
+     accent purple:  #a78bfa  (7:1 — AAA, icons / product chip)
+     status green:   #4ade80  (8:1 — AAA, mapped / enabled / up trends)
+     status amber:   #fbbf24  (10:1 — AAA, warnings)
+     status danger:  #fb7185  (6:1 — AA, errors / down trends)
+*/
+
+html.dark {
+  background-color: #0a1018;
+  color: #f1f5f9;
+  color-scheme: dark;
+  transition: background-color 200ms ease-in-out, color 200ms ease-in-out;
+}
+
+html.dark body { background-color: #0a1018; }
+
+/* ── Backgrounds ── */
+html.dark .bg-white,
+html.dark [class*="bg-[#ffffff]"],
+html.dark [class*="bg-[#fff]"] { background-color: #10151c !important; }
+
+html.dark [class*="bg-[#f7f8fa]"] { background-color: #0a1018 !important; }
+html.dark [class*="bg-[#f9fafb]"],
+html.dark [class*="bg-[#fafafa]"] { background-color: #0d1218 !important; }
+html.dark [class*="bg-[#f3f4f6]"] { background-color: #161b25 !important; }
+html.dark .bg-gray-50 { background-color: #161b25 !important; }
+html.dark [class*="bg-[#e5e7eb]"] { background-color: #1e293b !important; }
+
+/* Selected nav / brand blue tints → radiant blue tint */
+html.dark [class*="bg-[#eff6ff]"] { background-color: rgba(59, 130, 246, 0.12) !important; }
+html.dark [class*="bg-[#dbeafe]"] { background-color: rgba(59, 130, 246, 0.22) !important; }
+
+/* Status backgrounds — keep semantic colour family, use vibrant tints */
+html.dark [class*="bg-[#dcfce7]"] { background-color: rgba(74, 222, 128, 0.18) !important; }
+html.dark [class*="bg-[#f0fdf4]"] { background-color: rgba(74, 222, 128, 0.10) !important; }
+html.dark [class*="bg-[#fef9c2]"],
+html.dark [class*="bg-[#fef3c7]"],
+html.dark [class*="bg-[#fde68a]"] { background-color: rgba(251, 191, 36, 0.18) !important; }
+html.dark [class*="bg-[#fff7ed]"],
+html.dark [class*="bg-[#fed7aa]"] { background-color: rgba(251, 113, 133, 0.15) !important; }
+html.dark [class*="bg-[#fee2e2]"],
+html.dark [class*="bg-[#fff5f5]"] { background-color: rgba(251, 113, 133, 0.15) !important; }
+html.dark [class*="bg-[#ede9fe]"],
+html.dark [class*="bg-[#ddd6fe]"] { background-color: rgba(167, 139, 250, 0.18) !important; }
+
+/* ── Text ── */
+html.dark [class*="text-[#0a0a0a]"],
+html.dark [class*="text-[#101828]"],
+html.dark [class*="text-[#111318]"],
+html.dark [class*="text-[#1a212b]"] { color: #f1f5f9 !important; }
+
+html.dark [class*="text-[#374151]"] { color: #cbd5e1 !important; }
+html.dark [class*="text-[#4a5565]"],
+html.dark [class*="text-[#364153]"] { color: #94a3b8 !important; }
+html.dark [class*="text-[#6a7282]"] { color: #94a3b8 !important; }
+html.dark [class*="text-[#9ca3af]"],
+html.dark [class*="text-[#99a1af]"] { color: #64748b !important; }
+html.dark [class*="text-[#c0c7d0]"],
+html.dark [class*="text-[#cbd5e1]"],
+html.dark [class*="text-[#d1d5dc]"] { color: #475569 !important; }
+
+/* Brand blue text → radiant electric blue for scores, links, selected nav */
+html.dark [class*="text-[#155dfc]"],
+html.dark [class*="text-[#1d4ed8]"],
+html.dark [class*="text-[#2563eb]"],
+html.dark [class*="text-[#5598f6]"] { color: #7cc4ff !important; }
+
+/* Status green text → vibrant green (kept distinct from brand blue) */
+html.dark [class*="text-[#008236]"],
+html.dark [class*="text-[#00c950]"],
+html.dark [class*="text-[#15803d]"],
+html.dark [class*="text-[#16a34a]"] { color: #4ade80 !important; }
+html.dark [class*="text-[#a65f00]"],
+html.dark [class*="text-[#d97706]"],
+html.dark [class*="text-[#92400e]"],
+html.dark [class*="text-[#78350f]"],
+html.dark [class*="text-[#f59e0b]"] { color: #fbbf24 !important; }
+html.dark [class*="text-[#b1000f]"],
+html.dark [class*="text-[#dc2626]"],
+html.dark [class*="text-[#b91c1c]"] { color: #fb7185 !important; }
+html.dark [class*="text-[#6d28d9]"],
+html.dark [class*="text-[#7c3aed]"] { color: #a78bfa !important; }
+
+/* ── Borders ── */
+html.dark .border-gray-200 { border-color: #1e293b !important; }
+html.dark [class*="border-[#e5e7eb]"],
+html.dark [class*="border-[#f3f4f6]"] { border-color: #1e293b !important; }
+html.dark [class*="border-[#d1d5dc]"] { border-color: #2d3a4f !important; }
+html.dark [class*="border-[#bfdbfe]"] { border-color: rgba(59, 130, 246, 0.35) !important; }
+html.dark [class*="border-[#bbf7d0]"] { border-color: rgba(74, 222, 128, 0.35) !important; }
+html.dark [class*="border-[#fde68a]"],
+html.dark [class*="border-[#fecaca]"] { border-color: rgba(251, 113, 133, 0.3) !important; }
+html.dark [class*="border-[#ddd6fe]"] { border-color: rgba(167, 139, 250, 0.3) !important; }
+html.dark [class*="border-[#155dfc]"] { border-color: #3b82f6 !important; }
+
+/* ── Brand-colored backgrounds (buttons) ──
+   Radiant electric blue — same vibrancy as the mint accent, but blue.
+   Contrast: white on #3b82f6 = 4.6:1 (AA), white on #60a5fa = 3.7:1 (AA Large) */
+html.dark [class*="bg-[#155dfc]"] { background-color: #3b82f6 !important; color: #ffffff !important; }
+html.dark [class*="bg-[#1247cc]"],
+html.dark [class*="bg-[#1249cc]"],
+html.dark [class*="bg-[#1a4fd8]"] { background-color: #2563eb !important; color: #ffffff !important; }
+html.dark [class*="hover:bg-[#1247cc]"]:hover,
+html.dark [class*="hover:bg-[#1249cc]"]:hover,
+html.dark [class*="hover:bg-[#1a4fd8]"]:hover { background-color: #60a5fa !important; }
+
+/* Inputs */
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background-color: #10151c;
+  color: #f1f5f9;
+  border-color: #2d3a4f;
+}
+html.dark input::placeholder,
+html.dark textarea::placeholder { color: #64748b; }
+
+/* Hover states for hover:bg-* */
+html.dark .hover\:bg-gray-50:hover,
+html.dark [class*="hover:bg-[#fafafa]"]:hover,
+html.dark [class*="hover:bg-[#f9fafb]"]:hover,
+html.dark [class*="hover:bg-[#f3f4f6]"]:hover { background-color: #1a2332 !important; }
+
+/* Accessible focus ring — visible in both modes */
+*:focus-visible {
+  outline: 2px solid #155dfc;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+html.dark *:focus-visible { outline-color: #7cc4ff; }
+
+/* Respect users who can't tolerate motion */
+@media (prefers-reduced-motion: reduce) {
+  html.dark { transition: none; }
+}

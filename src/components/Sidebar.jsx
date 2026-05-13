@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   DataSourcesIcon,
@@ -22,6 +23,15 @@ const navItems = [
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const [isDark, setIsDark] = useState(() => {
+    try { return localStorage.getItem("theme") === "dark"; } catch { return false; }
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", isDark);
+    try { localStorage.setItem("theme", isDark ? "dark" : "light"); } catch {}
+  }, [isDark]);
 
   const isActive = (item) => {
     if (item.label === "Data sources") {
@@ -71,9 +81,13 @@ export default function Sidebar() {
 
         {/* Theme toggle */}
         <div className="border-t border-gray-200 pl-4 pt-4">
-          <button className="flex items-center gap-3 text-sm font-medium text-[#4a5565]">
+          <button
+            onClick={() => setIsDark((d) => !d)}
+            className="flex items-center gap-3 text-sm font-medium text-[#4a5565] hover:text-[#0a0a0a] transition-colors"
+            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          >
             <ThemeToggleIcon />
-            Theme Toggle
+            {isDark ? "Light mode" : "Dark mode"}
           </button>
         </div>
       </div>
